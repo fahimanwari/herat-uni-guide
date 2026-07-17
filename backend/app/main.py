@@ -41,6 +41,7 @@ from app.modules.admin_auth.router import router as admin_auth_router
 from app.modules.notifications.router import router as notifications_router
 from app.modules.exam.router import router as exam_router
 from app.modules.users.router import router as users_router
+from app.modules.question_bank.router import router as question_bank_router
 
 app.include_router(universities_router, prefix="/api/v1")
 app.include_router(faculties_router, prefix="/api/v1")
@@ -55,6 +56,7 @@ app.include_router(admin_auth_router, prefix="/api/v1")
 app.include_router(notifications_router, prefix="/api/v1")
 app.include_router(exam_router, prefix="/api/v1")
 app.include_router(users_router, prefix="/api/v1")
+app.include_router(question_bank_router, prefix="/api/v1")
 
 # SQLAdmin — import after app is created
 from app.admin import admin  # noqa: E402, F401
