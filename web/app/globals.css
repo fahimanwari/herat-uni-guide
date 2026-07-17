@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+:root {
+  /* Kashi Herati Palette — inspired by Herat Grand Mosque tiles */
+  --primary-50: #EEF4FB;
+  --primary-100: #D9E6F6;
+  --primary-200: #B3CDEC;
+  --primary-300: #84ADDF;
+  --primary-400: #4F86CD;
+  --primary-500: #2D66B5;
+  --primary-600: #1E5AA8;
+  --primary-700: #174683;
+  --primary-800: #123763;
+  --primary-900: #0D2848;
+
+  --accent-400: #2BBFB9;
+  --accent-500: #12A5A0;
+  --accent-600: #0E8783;
+
+  --gold-400: #F5B841;
+  --gold-500: #E0A22E;
+  --gold-600: #C4871C;
+
+  --success: #16A34A;
+  --warning: #D97706;
+  --danger: #DC2626;
+
+  --surface-light: #F8FAFC;
+  --surface-light-card: #FFFFFF;
+  --surface-dark: #0B1220;
+  --surface-dark-card: #111C30;
+
+  --background: var(--surface-light);
+  --foreground: #1E293B;
+  --muted: #64748B;
+  --border: #E2E8F0;
+}
+
+.dark {
+  --background: var(--surface-dark);
+  --foreground: #E2E8F0;
+  --muted: #94A3B8;
+  --border: #1E293B;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+
+  --color-primary-50: var(--primary-50);
+  --color-primary-100: var(--primary-100);
+  --color-primary-200: var(--primary-200);
+  --color-primary-300: var(--primary-300);
+  --color-primary-400: var(--primary-400);
+  --color-primary-500: var(--primary-500);
+  --color-primary-600: var(--primary-600);
+  --color-primary-700: var(--primary-700);
+  --color-primary-800: var(--primary-800);
+  --color-primary-900: var(--primary-900);
+
+  --color-accent-400: var(--accent-400);
+  --color-accent-500: var(--accent-500);
+  --color-accent-600: var(--accent-600);
+
+  --color-gold-400: var(--gold-400);
+  --color-gold-500: var(--gold-500);
+  --color-gold-600: var(--gold-600);
+
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+
+  --color-surface: var(--surface-light);
+  --color-surface-card: var(--surface-light-card);
+
+  --font-vazir: 'Vazirmatn', 'Tahoma', 'Arial', sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-vazir);
+  line-height: 1.8;
+}
+
+/* RTL support */
+[dir="rtl"] {
+  text-align: right;
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus visible for accessibility */
+:focus-visible {
+  outline: 2px solid var(--accent-500);
+  outline-offset: 2px;
+}
