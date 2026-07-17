@@ -4,6 +4,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_db
+from app.core.security import get_current_admin
+from app.modules.admin_auth.models import AdminUser
 from .service import DepartmentService
 from .schemas import (
     DepartmentListItem, DepartmentDetail, DepartmentCreate, DepartmentUpdate,
@@ -29,36 +31,59 @@ async def get_department(slug: str, db: AsyncSession = Depends(get_db)):
 
 @router.post("", response_model=DepartmentDetail, status_code=201)
 async def create_department(
-    payload: DepartmentCreate, db: AsyncSession = Depends(get_db)
+    payload: DepartmentCreate,
+    db: AsyncSession = Depends(get_db),
+    admin: AdminUser = Depends(get_current_admin),
 ):
     return await DepartmentService(db).create_department(payload)
 
 
 @router.patch("/{slug}", response_model=DepartmentDetail)
 async def update_department(
-    slug: str, payload: DepartmentUpdate, db: AsyncSession = Depends(get_db)
+    slug: str,
+    payload: DepartmentUpdate,
+    db: AsyncSession = Depends(get_db),
+    admin: AdminUser = Depends(get_current_admin),
 ):
     return await DepartmentService(db).update_department(slug, payload)
+
+
+@router.delete("/{slug}", status_code=204)
+async def delete_department(
+    slug: str,
+    db: AsyncSession = Depends(get_db),
+    admin: AdminUser = Depends(get_current_admin),
+):
+    await DepartmentService(db).delete_department(slug)
 
 
 # --- Sub-tables ---
 
 @router.post("/{slug}/projects", response_model=StudentProjectSchema, status_code=201)
 async def add_student_project(
-    slug: str, payload: StudentProjectCreate, db: AsyncSession = Depends(get_db)
+    slug: str,
+    payload: StudentProjectCreate,
+    db: AsyncSession = Depends(get_db),
+    admin: AdminUser = Depends(get_current_admin),
 ):
     return await DepartmentService(db).add_student_project(slug, payload)
 
 
 @router.post("/{slug}/alumni", response_model=AlumniStorySchema, status_code=201)
 async def add_alumni_story(
-    slug: str, payload: AlumniStoryCreate, db: AsyncSession = Depends(get_db)
+    slug: str,
+    payload: AlumniStoryCreate,
+    db: AsyncSession = Depends(get_db),
+    admin: AdminUser = Depends(get_current_admin),
 ):
     return await DepartmentService(db).add_alumni_story(slug, payload)
 
 
 @router.post("/{slug}/roadmaps", response_model=CareerRoadmapSchema, status_code=201)
 async def add_career_roadmap(
-    slug: str, payload: CareerRoadmapCreate, db: AsyncSession = Depends(get_db)
+    slug: str,
+    payload: CareerRoadmapCreate,
+    db: AsyncSession = Depends(get_db),
+    admin: AdminUser = Depends(get_current_admin),
 ):
     return await DepartmentService(db).add_career_roadmap(slug, payload)

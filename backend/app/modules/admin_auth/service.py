@@ -57,19 +57,21 @@ class AdminAuthService:
     async def _create_tokens(self, admin_id: uuid.UUID) -> TokenResponse:
         now = datetime.utcnow()
 
-        # Access token
+        # jti تصادفی: بدون آن، دو لاگین در یک ثانیه توکن یکسان می‌سازند
+        # (payload فقط sub+exp بود) → تصادم unique در refresh_tokens → خطای 500
         access_payload = {
             "sub": str(admin_id),
             "exp": now + timedelta(minutes=ACCESS_TOKEN_EXPIRE),
             "type": "access",
+            "jti": str(uuid.uuid4()),
         }
         access_token = jwt.encode(access_payload, settings.jwt_secret, algorithm="HS256")
 
-        # Refresh token
         refresh_payload = {
             "sub": str(admin_id),
             "exp": now + timedelta(days=REFRESH_TOKEN_EXPIRE),
             "type": "refresh",
+            "jti": str(uuid.uuid4()),
         }
         refresh_token = jwt.encode(refresh_payload, settings.jwt_secret, algorithm="HS256")
 

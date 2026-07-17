@@ -30,3 +30,10 @@ class EventRepository:
         await self.db.commit()
         await self.db.refresh(obj)
         return obj
+
+    async def get_by_id(self, id) -> AcademicEvent | None:
+        return await self.db.get(AcademicEvent, id)
+
+    async def delete(self, obj: AcademicEvent) -> None:
+        await self.db.delete(obj)
+        await self.db.commit()

@@ -35,6 +35,13 @@ class QuizRepository:
         q = select(QuizOption).where(QuizOption.id.in_(ids))
         return list((await self.db.execute(q)).scalars())
 
-    async def all_profiles(self) -> list[DepartmentTraitProfile]:
-        q = select(DepartmentTraitProfile)
-        return list((await self.db.execute(q)).scalars())
+    async def all_profiles_with_departments(self):
+        """پروفایل صفات + slug و نام رشته — فقط دیپارتمنت‌های فارغ‌ده"""
+        from app.modules.departments.models import Department
+
+        q = (
+            select(DepartmentTraitProfile, Department.slug, Department.name_fa)
+            .join(Department, Department.id == DepartmentTraitProfile.department_id)
+            .where(Department.department_type == "degree")
+        )
+        return list((await self.db.execute(q)).all())

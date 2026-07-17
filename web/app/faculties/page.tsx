@@ -1,33 +1,36 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Header } from "../components/layout/Header";
 import { Footer } from "../components/layout/Footer";
 import { Card, SectionTitle } from "../components/ui";
-import { api } from "../lib/api";
+import { FacultyListItem } from "../lib/types";
 
-export const metadata = {
-  title: "پوهنځی‌ها | پوهنتون هرات",
-  description: "فهرست تمام ۱۶ پوهنځی پوهنتون هرات",
-};
+const API = "http://localhost:9000/api/v1";
 
-export default async function FacultiesPage() {
-  let faculties: import("../lib/types").FacultyListItem[] = [];
-  try {
-    faculties = await api.faculties.list();
-  } catch {
-    faculties = [];
-  }
+export default function FacultiesPage() {
+  const [faculties, setFaculties] = useState<FacultyListItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`${API}/faculties`)
+      .then(r => r.json())
+      .then(setFaculties)
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <>
       <Header />
       <main className="flex-1 py-12">
         <div className="max-w-7xl mx-auto px-4">
-          <SectionTitle
-            title="پوهنځی‌ها"
-            subtitle="همه ۱۶ پوهنځی پوهنتون هرات"
-          />
+          <SectionTitle title="پوهنځی‌ها" subtitle="همه ۱۶ پوهنځی پوهنتون هرات" />
 
-          {faculties.length === 0 ? (
+          {loading ? (
+            <div className="text-center py-16 text-muted">در حال بارگذاری...</div>
+          ) : faculties.length === 0 ? (
             <div className="text-center py-16">
               <span className="text-4xl mb-4 block">📚</span>
               <p className="text-muted text-lg">هنوز پوهنځی ثبت نشده است</p>
@@ -37,12 +40,8 @@ export default async function FacultiesPage() {
               {faculties.map((fac) => (
                 <Link key={fac.id} href={`/faculties/${fac.slug}`}>
                   <Card clickable className="h-full">
-                    <h3 className="font-bold text-lg mb-2 text-foreground">
-                      {fac.name_fa}
-                    </h3>
-                    {fac.name_en && (
-                      <p className="text-muted text-sm">{fac.name_en}</p>
-                    )}
+                    <h3 className="font-bold text-lg mb-2 text-foreground">{fac.name_fa}</h3>
+                    {fac.name_en && <p className="text-muted text-sm">{fac.name_en}</p>}
                   </Card>
                 </Link>
               ))}

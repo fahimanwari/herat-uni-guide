@@ -92,10 +92,12 @@ class UserService:
     async def _create_tokens(self, user: User):
         now = datetime.utcnow()
 
+        # jti تصادفی — دو لاگین در یک ثانیه نباید توکن یکسان بسازند
         access_payload = {
             "sub": str(user.id),
             "exp": now + timedelta(minutes=ACCESS_TOKEN_EXPIRE),
             "type": "access",
+            "jti": str(uuid.uuid4()),
         }
         access_token = jwt.encode(access_payload, settings.jwt_secret, algorithm="HS256")
 
@@ -103,6 +105,7 @@ class UserService:
             "sub": str(user.id),
             "exp": now + timedelta(days=REFRESH_TOKEN_EXPIRE),
             "type": "refresh",
+            "jti": str(uuid.uuid4()),
         }
         refresh_token = jwt.encode(refresh_payload, settings.jwt_secret, algorithm="HS256")
 

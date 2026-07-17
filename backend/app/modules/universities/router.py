@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_db
+from app.core.security import get_current_admin
+from app.modules.admin_auth.models import AdminUser
 from .service import UniversityService
 from .schemas import UniversityListItem, UniversityDetail, UniversityCreate, UniversityUpdate
 
@@ -20,13 +22,27 @@ async def get_university(slug: str, db: AsyncSession = Depends(get_db)):
 
 @router.post("", response_model=UniversityDetail, status_code=201)
 async def create_university(
-    payload: UniversityCreate, db: AsyncSession = Depends(get_db)
+    payload: UniversityCreate,
+    db: AsyncSession = Depends(get_db),
+    admin: AdminUser = Depends(get_current_admin),
 ):
     return await UniversityService(db).create_university(payload)
 
 
 @router.patch("/{slug}", response_model=UniversityDetail)
 async def update_university(
-    slug: str, payload: UniversityUpdate, db: AsyncSession = Depends(get_db)
+    slug: str,
+    payload: UniversityUpdate,
+    db: AsyncSession = Depends(get_db),
+    admin: AdminUser = Depends(get_current_admin),
 ):
     return await UniversityService(db).update_university(slug, payload)
+
+
+@router.delete("/{slug}", status_code=204)
+async def delete_university(
+    slug: str,
+    db: AsyncSession = Depends(get_db),
+    admin: AdminUser = Depends(get_current_admin),
+):
+    await UniversityService(db).delete_university(slug)

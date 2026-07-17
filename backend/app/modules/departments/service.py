@@ -31,6 +31,10 @@ class DepartmentService:
         dept = await self.get_department(slug)
         return await self.repo.update(dept, payload.model_dump(exclude_unset=True))
 
+    async def delete_department(self, slug: str):
+        dept = await self.get_department(slug)
+        await self.repo.delete(dept)
+
     # Sub-tables
     async def add_student_project(self, slug: str, payload: StudentProjectCreate):
         dept = await self.get_department(slug)

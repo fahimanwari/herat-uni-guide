@@ -27,3 +27,7 @@ class FacultyService:
     async def update_faculty(self, slug: str, payload: FacultyUpdate):
         fac = await self.get_faculty(slug)
         return await self.repo.update(fac, payload.model_dump(exclude_unset=True))
+
+    async def delete_faculty(self, slug: str):
+        fac = await self.get_faculty(slug)
+        await self.repo.delete(fac)

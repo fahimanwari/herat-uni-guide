@@ -27,3 +27,7 @@ class NewsService:
     async def update_news(self, id: uuid.UUID, payload: NewsUpdate):
         item = await self.get_news(id)
         return await self.repo.update(item, payload.model_dump(exclude_unset=True))
+
+    async def delete_news(self, id: uuid.UUID):
+        item = await self.get_news(id)
+        await self.repo.delete(item)

@@ -21,15 +21,13 @@ class QuizService:
             for trait, w in opt.trait_weights.items():
                 user_vector[trait] = user_vector.get(trait, 0) + w
 
-        # 2. Cosine similarity with each department profile
+        # 2. Cosine similarity with each degree-department profile
         matches = []
-        for profile in await self.repo.all_profiles():
+        for profile, slug, name_fa in await self.repo.all_profiles_with_departments():
             sim = cosine_similarity(user_vector, profile.trait_weights)
-            # Get department name from relationship if available
-            dept_name = profile.department_id  # fallback
             matches.append(QuizMatch(
-                department_slug=str(profile.department_id),
-                department_name=dept_name,
+                department_slug=slug,
+                department_name=name_fa,
                 percent=round(sim * 100),
             ))
         return sorted(matches, key=lambda m: -m.percent)[:5]

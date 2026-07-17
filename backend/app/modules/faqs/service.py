@@ -27,3 +27,7 @@ class FaqService:
     async def update_faq(self, id: uuid.UUID, payload: FaqUpdate):
         faq = await self.get_faq(id)
         return await self.repo.update(faq, payload.model_dump(exclude_unset=True))
+
+    async def delete_faq(self, id: uuid.UUID):
+        faq = await self.get_faq(id)
+        await self.repo.delete(faq)
