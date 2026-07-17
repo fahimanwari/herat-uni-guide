@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import String, Text, Integer, Float, ForeignKey, JSON, Boolean
+from sqlalchemy import String, Text, Integer, Float, ForeignKey, JSON, Boolean, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -15,8 +15,11 @@ class Exam(Base):
     title_en: Mapped[str | None] = mapped_column(String(300))
     description_fa: Mapped[str | None] = mapped_column(Text)
     category: Mapped[str] = mapped_column(String(100))  # 'kankor', 'department', 'general'
+    year: Mapped[int | None] = mapped_column(Integer)  # سال امتحان (مثلاً 1404)
     duration_minutes: Mapped[int] = mapped_column(Integer, default=60)
     total_questions: Mapped[int] = mapped_column(Integer, default=0)
+    passing_score: Mapped[float] = mapped_column(Float, default=50.0)  # نمره قبولی
+    max_score: Mapped[float] = mapped_column(Float, default=100.0)  # بیشترین نمره
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
@@ -34,6 +37,7 @@ class ExamQuestion(Base):
     question_en: Mapped[str | None] = mapped_column(Text)
     sort_order: Mapped[int] = mapped_column(Integer, default=0)
     points: Mapped[int] = mapped_column(Integer, default=1)
+    subject: Mapped[str | None] = mapped_column(String(50))  # 'math', 'physics', etc.
 
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
@@ -60,15 +64,36 @@ class ExamResult(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     exam_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("exams.id"))
+    user_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     session_id: Mapped[str] = mapped_column(String(100))
-    score: Mapped[float] = mapped_column(Float, default=0)
+
+    # Scoring
+    score: Mapped[float] = mapped_column(Float, default=0)  # نمره از 100
+    raw_score: Mapped[float] = mapped_column(Float, default=0)  # نمره خام
     total_points: Mapped[int] = mapped_column(Integer, default=0)
     correct_answers: Mapped[int] = mapped_column(Integer, default=0)
+    wrong_answers: Mapped[int] = mapped_column(Integer, default=0)
+    empty_answers: Mapped[int] = mapped_column(Integer, default=0)
     total_answers: Mapped[int] = mapped_column(Integer, default=0)
+
+    # Subject scores
+    subject_scores: Mapped[dict] = mapped_column(JSON, default=dict)
+    # {"math": 80, "physics": 60, ...}
+
+    # Detailed answers
     answers: Mapped[dict] = mapped_column(JSON, default=dict)
-    # {"question_id": "option_id", ...}
+    # {"question_id": {"selected": "option_id", "correct": "option_id", "is_correct": true}}
+
+    # Timing
     time_taken_seconds: Mapped[int | None] = mapped_column(Integer)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime)
+
+    # Year comparison
+    exam_year: Mapped[int | None] = mapped_column(Integer)
+    compared_to_avg: Mapped[float | None] = mapped_column(Float)  # درصد بهتر از میانگین
 
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
     exam = relationship("Exam", back_populates="results")
+    user = relationship("User")

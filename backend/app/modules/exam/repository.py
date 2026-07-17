@@ -66,3 +66,11 @@ class ExamRepository:
             "avg_score": round(result.avg_score or 0, 1),
             "max_score": result.max_score or 0,
         }
+
+    async def get_results_for_exam(self, exam_id: uuid.UUID) -> list[ExamResult]:
+        q = (
+            select(ExamResult)
+            .where(ExamResult.exam_id == exam_id)
+            .order_by(ExamResult.created_at.desc())
+        )
+        return list((await self.db.execute(q)).scalars())

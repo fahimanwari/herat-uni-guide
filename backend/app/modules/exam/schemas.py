@@ -20,6 +20,7 @@ class QuestionSchema(BaseModel):
     question_en: str | None
     sort_order: int
     points: int
+    subject: str | None
     options: list[OptionSchema]
 
 
@@ -30,12 +31,15 @@ class ExamListItem(BaseModel):
     title_fa: str
     title_en: str | None
     category: str
+    year: int | None
     duration_minutes: int
     total_questions: int
+    passing_score: float
 
 
 class ExamDetail(ExamListItem):
     description_fa: str | None
+    max_score: float
 
 
 class ExamWithQuestions(ExamDetail):
@@ -44,8 +48,17 @@ class ExamWithQuestions(ExamDetail):
 
 class SubmitExamRequest(BaseModel):
     session_id: str
+    user_id: str | None = None
     answers: dict[str, str]  # {question_id: option_id}
     time_taken_seconds: int | None = None
+    started_at: str | None = None
+
+
+class SubjectScore(BaseModel):
+    subject: str
+    correct: int
+    total: int
+    percentage: float
 
 
 class ExamResultResponse(BaseModel):
@@ -54,14 +67,31 @@ class ExamResultResponse(BaseModel):
     id: uuid.UUID
     exam_id: uuid.UUID
     score: float
-    total_points: int
+    raw_score: float
     correct_answers: int
+    wrong_answers: int
+    empty_answers: int
     total_answers: int
+    subject_scores: dict
     percentage: float
+    passed: bool
     time_taken_seconds: int | None
+    compared_to_avg: float | None
     created_at: datetime
 
 
 class ExamResultDetail(ExamResultResponse):
     answers: dict
     exam_title: str
+    exam_year: int | None
+
+
+class UserStats(BaseModel):
+    total_exams: int
+    average_score: float
+    best_score: float
+    worst_score: float
+    total_time_minutes: int
+    subject_averages: dict
+    improvement_trend: str  # 'improving', 'stable', 'declining'
+    rank_estimate: str  # 'top 10%', 'top 25%', etc.

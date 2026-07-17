@@ -8,6 +8,7 @@ import uuid
 
 from app.database import SessionLocal
 from app.modules.exam.models import Exam, ExamQuestion, ExamOption
+from app.modules.users.models import User  # noqa: F401 - needed for relationship
 
 
 async def seed():
