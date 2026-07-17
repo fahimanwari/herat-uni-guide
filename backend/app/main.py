@@ -58,5 +58,4 @@ app.include_router(exam_router, prefix="/api/v1")
 app.include_router(users_router, prefix="/api/v1")
 app.include_router(question_bank_router, prefix="/api/v1")
 
-# SQLAdmin — import after app is created
-from app.admin import admin  # noqa: E402, F401
+# SQLAdmin removed — all admin features are in frontend admin panel

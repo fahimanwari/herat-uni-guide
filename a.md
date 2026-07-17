@@ -1,1 +1,41 @@
-از ادمین چزی اضافه شود در فراند دیده نمیشو د و تما م پوهنحی ها را ثبت کن به همین اطلاعاتی که داری و میشه کا از فولدر question ببین که چی سوال های شده و در تمام ۱۶ پهنی تمام ۷۰ دیپارتمنت را بساز    اطلاعات از بکد به فرانت روان یا دیده نمیشود میتوانی ببین فرانت را فعلا   وساختار  بکند را ببین و بیبن که آیا فراند اون سلسله مراتب که اول پوهنتون ها معرفی میشه حالا که ما ۳۴ انه پونهتون ولتی داریم در افغانیتاسن پو داخل هر پوهنتون پوهنحی ها داریم و داخل هر پوهنح ی ما دیپارتمنت ها داریم ببین آيا این سلسله مراتب رعایت میشه د=توی فراند و بیبن که آيا تغیرات در بکنند با admin  که انجام میشه آیا واقعلد ر نمایش داده میشود و همه چیز اوکی است و میتتانی  که فعلا پوهنجی ها را ایحاد کنی و  میتوانی که از پوشه questionسوالهای تمام ۷۰ دیپارتمنت تمام ۱۶ پوهنحی را ببین پو ببین برای پوهنتون هرات برای من بساز همه چیز را باز من بعدا اصلا میکنم متن هایش را و بیبن آیا باز از admin آیا میتوانم اطلاعات را آپدیت کنم ؟
+Admin
+Universitys
+Facultys
+Departments
+Student Projects
+Alumni Storys
+Career Roadmaps
+Newss
+Faqs
+Kankor Cutoffs
+Kankor Guides
+Quiz Questions
+Quiz Options
+Department Trait Profiles
+Rag Chunks
+Ai Chat Logs
+Academic Events
+
+
+
+
+http://localhost:4000/admin
+
+
+This page couldn’t load
+Reload to try again, or go back.
+
+Reload
+Back
+
+Uncaught TypeError: c.map is not a function
+    at 34ct42nied05u.js:1:19387
+    at ay (3rxl-jt3pdxgx.js:1:63846)
+    at oJ (3rxl-jt3pdxgx.js:1:84103)
+    at iu (3rxl-jt3pdxgx.js:1:95705)
+    at sd (3rxl-jt3pdxgx.js:1:138945)
+    at 3rxl-jt3pdxgx.js:1:138790
+    at sf (3rxl-jt3pdxgx.js:1:138798)
+    at se (3rxl-jt3pdxgx.js:1:134719)
+    at sQ (3rxl-jt3pdxgx.js:1:160617)
+    at sU (3rxl-jt3pdxgx.js:1:158831)
