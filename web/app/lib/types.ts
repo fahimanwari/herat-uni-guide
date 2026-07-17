@@ -125,3 +125,19 @@ export interface FaqDetail extends FaqListItem {
   question_en: string | null;
   answer_en: string | null;
 }
+
+export interface ExamListItem {
+  id: string;
+  title_fa: string;
+  title_en: string | null;
+  category: string;
+  year: number | null;
+  duration_minutes: number;
+  total_questions: number;
+  passing_score: number;
+}
+
+export interface ExamDetail extends ExamListItem {
+  description_fa: string | null;
+  max_score: number;
+}
