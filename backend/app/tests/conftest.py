@@ -1,44 +1,32 @@
-import asyncio
-import uuid
-
-import pytest
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
-from app.database import Base
 from app.main import app
 from app.core.deps import get_db
+from app.database import engine, SessionLocal
 
-# Use SQLite for tests (fast, no Docker needed)
-TEST_DB_URL = "sqlite+aiosqlite:///./test.db"
-
-test_engine = create_async_engine(TEST_DB_URL)
-TestSession = async_sessionmaker(test_engine, expire_on_commit=False)
+# Import all models
+from app.modules.universities.models import University
+from app.modules.faculties.models import Faculty
+from app.modules.departments.models import Department, StudentProject, AlumniStory, CareerRoadmap
+from app.modules.kankor.models import KankorCutoff, KankorGuide
+from app.modules.quiz.models import QuizQuestion, QuizOption, DepartmentTraitProfile
+from app.modules.ai.models import RagChunk, AiChatLog
+from app.modules.admin_auth.models import AdminUser, RefreshToken
+from app.modules.notifications.models import AcademicEvent
+from app.modules.news.models import News
+from app.modules.faqs.models import Faq
 
 
 async def override_get_db():
-    async with TestSession() as session:
-        yield session
+    async with SessionLocal() as session:
+        try:
+            yield session
+        finally:
+            await session.close()
 
 
 app.dependency_overrides[get_db] = override_get_db
-
-
-@pytest.fixture(scope="session")
-def event_loop():
-    loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
-
-
-@pytest_asyncio.fixture(autouse=True)
-async def setup_db():
-    async with test_engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    yield
-    async with test_engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
 
 
 @pytest_asyncio.fixture

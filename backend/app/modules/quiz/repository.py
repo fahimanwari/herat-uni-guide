@@ -3,6 +3,7 @@ import math
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from .models import QuizQuestion, QuizOption, DepartmentTraitProfile
 
@@ -23,7 +24,11 @@ class QuizRepository:
         self.db = db
 
     async def list_questions(self) -> list[QuizQuestion]:
-        q = select(QuizQuestion).order_by(QuizQuestion.sort_order)
+        q = (
+            select(QuizQuestion)
+            .options(selectinload(QuizQuestion.options))
+            .order_by(QuizQuestion.sort_order)
+        )
         return list((await self.db.execute(q)).scalars())
 
     async def get_options(self, ids: list[uuid.UUID]) -> list[QuizOption]:
