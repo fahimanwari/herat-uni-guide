@@ -97,6 +97,53 @@ export default async function DepartmentPage({
             <p className="text-foreground leading-relaxed">{department.description_fa}</p>
           </Card>
 
+          {/* Intro - Is this major for me? */}
+          {department.intro_fa && (
+            <Card className="mb-8">
+              <h2 className="font-bold text-xl text-foreground mb-3">آیا این رشته برای من است؟</h2>
+              <p className="text-foreground leading-8 whitespace-pre-line">{department.intro_fa}</p>
+              <div className="flex gap-3 mt-4">
+                <a href="/quiz" className="px-4 py-2 border-2 border-primary-600 text-primary-600 rounded-[10px] text-sm hover:bg-primary-50 transition-colors">آزمون علاقه بده</a>
+                <a href="/chat" className="px-4 py-2 border-2 border-accent-500 text-accent-600 rounded-[10px] text-sm hover:bg-accent-500/10 transition-colors">از مشاور AI بپرس</a>
+              </div>
+            </Card>
+          )}
+
+          {/* Curriculum - Semester by semester */}
+          {department.curriculum && department.curriculum.length > 0 && (
+            <Card className="mb-8">
+              <h2 className="font-bold text-xl text-foreground mb-3">چه می‌خوانید؟ — سمستر به سمستر</h2>
+              {department.curriculum.map((c: any, i: number) => (
+                <details key={c.semester} open={i === 0} className="border-b border-border py-3 last:border-0">
+                  <summary className="cursor-pointer font-medium text-foreground">سمستر {c.semester} — {c.subjects.length} مضمون</summary>
+                  <ul className="mt-2 pr-6 list-disc text-muted">
+                    {c.subjects.map((s: string) => <li key={s}>{s}</li>)}
+                  </ul>
+                </details>
+              ))}
+            </Card>
+          )}
+
+          {/* Lecture Videos */}
+          {department.lecture_videos && department.lecture_videos.length > 0 && (
+            <Card className="mb-8">
+              <h2 className="font-bold text-xl text-foreground mb-3">نمونه درس‌های استادان</h2>
+              <div className="grid md:grid-cols-2 gap-4">
+                {department.lecture_videos.map((v: any) => (
+                  <div key={v.id} className="border border-border rounded-[10px] overflow-hidden">
+                    <iframe loading="lazy" className="w-full aspect-video"
+                      src={`https://www.youtube.com/embed/${v.video_url.split("v=")[1]?.split("&")[0] || v.video_url.split("/").pop()}`}
+                      title={v.title_fa} allowFullScreen />
+                    <div className="p-3">
+                      <p className="font-medium text-foreground">{v.title_fa}</p>
+                      <p className="text-muted text-sm">{v.lecturer_name}{v.subject ? ` · ${v.subject}` : ""}{v.semester ? ` · سمستر ${v.semester}` : ""}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+
           {/* Info Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <Card>

@@ -45,3 +45,4 @@ question/
 
 # Docker volumes
 docker-compose.override.yml
+books/

@@ -11,6 +11,7 @@ const API = API_BASE;
 // --- Menu ---
 const menuGroups = [
   { title: "محتوا", items: [
+    { id: "universities", icon: "🏛️", label: "پوهنتون‌ها" },
     { id: "faculties", icon: "📚", label: "پوهنځی‌ها" },
     { id: "departments", icon: "🎓", label: "دیپارتمنت‌ها" },
     { id: "news", icon: "📰", label: "اخبار" },
@@ -39,6 +40,7 @@ const PAGE_SIZE = 20;
 // --- Defaults ---
 function getDefaults(t: string): any {
   const defaults: Record<string, any> = {
+    universities: { name_fa: "", slug: "", description_fa: "", is_active: true },
     faculties: { name_fa: "", slug: "", description_fa: "" },
     departments: { name_fa: "", slug: "", description_fa: "", department_type: "degree", duration_years: 4 },
     news: { title_fa: "", body_fa: "", is_published: false },
@@ -98,7 +100,7 @@ export default function AdminPage() {
   const [page, setPage] = useState(1);
   const [deleteConfirm, setDeleteConfirm] = useState<{ type: string; id: string; name: string } | null>(null);
   const [subDept, setSubDept] = useState<any>(null);
-  const [subTab, setSubTab] = useState<"projects" | "alumni" | "roadmaps">("projects");
+  const [subTab, setSubTab] = useState<"projects" | "alumni" | "roadmaps" | "videos">("projects");
   const [subItems, setSubItems] = useState<any[]>([]);
   const [subLoading, setSubLoading] = useState(false);
   const [subForm, setSubForm] = useState<any>(null);
@@ -137,6 +139,7 @@ export default function AdminPage() {
     setLoading(true);
     try {
       const endpoints: Record<string, string> = {
+        universities: "/universities",
         faculties: "/faculties",
         departments: "/departments",
         news: "/news",
@@ -386,6 +389,7 @@ export default function AdminPage() {
       if (tab === "projects") setSubItems(dept.student_projects || []);
       else if (tab === "alumni") setSubItems(dept.alumni_stories || []);
       else if (tab === "roadmaps") setSubItems(dept.career_roadmaps || []);
+      else if (tab === "videos") setSubItems(dept.lecture_videos || []);
     } catch { showToast("خطا در بارگذاری", "error"); }
     setSubLoading(false);
   };
@@ -393,7 +397,7 @@ export default function AdminPage() {
   const handleSubSave = async () => {
     if (!subDept || !subForm) return;
     try {
-      const endpoint = `/departments/${subDept.slug}/${subTab === "projects" ? "projects" : subTab === "alumni" ? "alumni" : "roadmaps"}`;
+      const endpoint = `/departments/${subDept.slug}/${subTab === "projects" ? "projects" : subTab === "alumni" ? "alumni" : subTab === "videos" ? "videos" : "roadmaps"}`;
       await adminApi.create(endpoint, subForm);
       showToast("ایجاد شد");
       setSubForm(null);
@@ -404,7 +408,7 @@ export default function AdminPage() {
   const handleSubDelete = async (itemId: string) => {
     if (!subDept) return;
     try {
-      await adminApi.delete(`/departments/${subDept.slug}/${subTab === "projects" ? "projects" : subTab === "alumni" ? "alumni" : "roadmaps"}/${itemId}`);
+      await adminApi.delete(`/departments/${subDept.slug}/${subTab === "projects" ? "projects" : subTab === "alumni" ? "alumni" : subTab === "videos" ? "videos" : "roadmaps"}/${itemId}`);
       showToast("حذف شد");
       await loadSubItems(subDept.slug, subTab);
     } catch (e: any) { showToast(e?.message || "خطا", "error"); }
@@ -637,6 +641,7 @@ export default function AdminPage() {
                       <table className="w-full text-sm border-collapse">
                         <thead>
                           <tr className="bg-surface border-b border-border">
+                            {sidebar === "universities" && <><th onClick={() => toggleSort("name_fa")} className="text-right p-3 text-muted cursor-pointer hover:text-foreground">نام{sortIcon("name_fa")}</th><th className="text-right p-3 text-muted">Slug</th><th className="text-right p-3 text-muted">وضعیت</th><th className="text-right p-3 text-muted">عملیات</th></>}
                             {sidebar === "faculties" && <><th onClick={() => toggleSort("name_fa")} className="text-right p-3 text-muted cursor-pointer hover:text-foreground">نام{sortIcon("name_fa")}</th><th className="text-right p-3 text-muted">Slug</th><th className="text-right p-3 text-muted">عملیات</th></>}
                             {sidebar === "news" && <><th onClick={() => toggleSort("title_fa")} className="text-right p-3 text-muted cursor-pointer hover:text-foreground">عنوان{sortIcon("title_fa")}</th><th className="text-right p-3 text-muted">وضعیت</th><th className="text-right p-3 text-muted">عملیات</th></>}
                             {sidebar === "faqs" && <><th onClick={() => toggleSort("question_fa")} className="text-right p-3 text-muted cursor-pointer hover:text-foreground">سوال{sortIcon("question_fa")}</th><th className="text-right p-3 text-muted">دسته</th><th className="text-right p-3 text-muted">عملیات</th></>}
@@ -655,6 +660,7 @@ export default function AdminPage() {
                         <tbody>
                           {paginated.map((item: any) => (
                             <tr key={item.id || item.slug} className="border-b border-border hover:bg-surface">
+                              {sidebar === "universities" && <><td className="p-3 font-medium text-foreground">{item.name_fa}</td><td className="p-3 text-muted">{item.slug}</td><td className="p-3"><span className={`px-2 py-1 rounded text-xs ${item.is_active ? "bg-success/10 text-success" : "bg-danger/10 text-danger"}`}>{item.is_active ? "فعال" : "غیرفعال"}</span></td><td className="p-3"><button onClick={() => openEdit("universities", item)} className="text-primary-600 hover:underline text-sm ml-2">ویرایش</button><button onClick={() => confirmDelete("universities", item.id, item.name_fa)} className="text-danger hover:underline text-sm">حذف</button></td></>}
                               {sidebar === "faculties" && <><td className="p-3 font-medium text-foreground">{item.name_fa}</td><td className="p-3 text-muted">{item.slug}</td><td className="p-3"><button onClick={() => openEdit("faculties", item)} className="text-primary-600 hover:underline text-sm ml-2">ویرایش</button><button onClick={() => confirmDelete("faculties", item.id, item.name_fa)} className="text-danger hover:underline text-sm">حذف</button></td></>}
                               {sidebar === "news" && <><td className="p-3 text-foreground">{item.title_fa}</td><td className="p-3"><span className={`px-2 py-1 rounded text-xs ${item.is_published ? "bg-success/10 text-success" : "bg-warning/10 text-warning"}`}>{item.is_published ? "منتشر" : "پیش‌نویس"}</span></td><td className="p-3"><button onClick={() => openEdit("news", item)} className="text-primary-600 hover:underline text-sm ml-2">ویرایش</button><button onClick={() => confirmDelete("news", item.id, item.title_fa)} className="text-danger hover:underline text-sm">حذف</button></td></>}
                               {sidebar === "faqs" && <><td className="p-3 text-foreground">{item.question_fa}</td><td className="p-3 text-muted">{item.category || "-"}</td><td className="p-3"><button onClick={() => openEdit("faqs", item)} className="text-primary-600 hover:underline text-sm ml-2">ویرایش</button><button onClick={() => confirmDelete("faqs", item.id, item.question_fa)} className="text-danger hover:underline text-sm">حذف</button></td></>}
@@ -738,7 +744,7 @@ export default function AdminPage() {
 
               {/* Tabs */}
               <div className="flex gap-1 mb-4 bg-surface rounded-lg p-1">
-                {([["projects", "پروژه‌ها"], ["alumni", "فارغان"], ["roadmaps", "نقشه شغلی"]] as const).map(([k, l]) => (
+                {([["projects", "پروژه‌ها"], ["alumni", "فارغان"], ["roadmaps", "نقشه شغلی"], ["videos", "ویدیوها"]] as const).map(([k, l]) => (
                   <button key={k} onClick={() => { setSubTab(k); loadSubItems(subDept.slug, k); setSubForm(null); }} className={`flex-1 py-2 rounded-md text-sm font-medium transition-colors ${subTab === k ? "bg-primary-600 text-white" : "text-muted hover:bg-surface-card"}`}>{l}</button>
                 ))}
               </div>
@@ -789,10 +795,11 @@ export default function AdminPage() {
                     projects: { title_fa: "", description_fa: "", students: "", year: 1404 },
                     alumni: { full_name: "", graduation_year: 1395, current_position: "", story_fa: "" },
                     roadmaps: { career_title_fa: "", steps: [] },
+                    videos: { title_fa: "", video_url: "", subject: "", semester: 1, lecturer_name: "", description_fa: "" },
                   };
                   setSubForm(defaults[subTab] || {});
                 }} className="w-full py-2 border-2 border-dashed border-border rounded-lg text-muted hover:border-primary-400 hover:text-primary-600 transition-colors text-sm">
-                  + افزودن {subTab === "projects" ? "پروژه" : subTab === "alumni" ? "داستان فارغ" : "نقشه شغلی"}
+                  + افزودن {subTab === "projects" ? "پروژه" : subTab === "alumni" ? "داستان فارغ" : subTab === "videos" ? "ویدیو" : "نقشه شغلی"}
                 </button>
               )}
             </div>

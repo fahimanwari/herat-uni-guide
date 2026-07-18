@@ -24,6 +24,8 @@ class News(Base):
     is_published: Mapped[bool] = mapped_column(Boolean, default=False)
     published_at: Mapped[datetime | None] = mapped_column(DateTime)
     send_notification: Mapped[bool] = mapped_column(Boolean, default=False)
+    source_url: Mapped[str | None] = mapped_column(String(500), unique=True)
+    is_ai_draft: Mapped[bool] = mapped_column(Boolean, default=False)
 
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(

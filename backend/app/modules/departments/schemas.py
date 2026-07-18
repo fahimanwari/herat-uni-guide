@@ -3,6 +3,31 @@ import uuid
 from pydantic import BaseModel, ConfigDict
 
 
+# --- Department Video ---
+
+class DepartmentVideoSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    title_fa: str
+    subject: str | None
+    semester: int | None
+    lecturer_name: str | None
+    video_url: str
+    description_fa: str | None
+    sort_order: int
+
+
+class DepartmentVideoCreate(BaseModel):
+    title_fa: str
+    video_url: str
+    subject: str | None = None
+    semester: int | None = None
+    lecturer_name: str | None = None
+    description_fa: str | None = None
+    sort_order: int = 0
+
+
 # --- Department ---
 
 class DepartmentListItem(BaseModel):
@@ -31,9 +56,12 @@ class DepartmentDetail(DepartmentListItem):
     suitable_for: list
     job_market_fa: str | None
     difficulty_level: str | None
+    intro_fa: str | None = None
+    curriculum: list = []
     student_projects: list[StudentProjectSchema] = []
     alumni_stories: list[AlumniStorySchema] = []
     career_roadmaps: list[CareerRoadmapSchema] = []
+    lecture_videos: list[DepartmentVideoSchema] = []
 
 
 class DepartmentCreate(BaseModel):
@@ -56,6 +84,8 @@ class DepartmentCreate(BaseModel):
     suitable_for: list = []
     job_market_fa: str | None = None
     difficulty_level: str | None = None
+    intro_fa: str | None = None
+    curriculum: list = []
 
 
 class DepartmentUpdate(BaseModel):
@@ -76,6 +106,8 @@ class DepartmentUpdate(BaseModel):
     suitable_for: list | None = None
     job_market_fa: str | None = None
     difficulty_level: str | None = None
+    intro_fa: str | None = None
+    curriculum: list | None = None
 
 
 # --- Student Project ---

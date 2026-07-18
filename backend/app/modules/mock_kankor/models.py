@@ -13,6 +13,7 @@ class MockExamSession(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     session_id: Mapped[str] = mapped_column(String(100), index=True)
+    user_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     blueprint_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("exam_blueprints.id", ondelete="SET NULL"), nullable=True
     )

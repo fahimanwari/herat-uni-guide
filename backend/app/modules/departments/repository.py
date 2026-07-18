@@ -31,6 +31,7 @@ class DepartmentRepository:
                 selectinload(Department.student_projects),
                 selectinload(Department.alumni_stories),
                 selectinload(Department.career_roadmaps),
+                selectinload(Department.lecture_videos),
             )
             .where(Department.slug == slug)
         )
@@ -71,6 +72,16 @@ class DepartmentRepository:
 
     async def add_career_roadmap(self, department_id: uuid.UUID, data: dict) -> CareerRoadmap:
         obj = CareerRoadmap(department_id=department_id, **data)
+        self.db.add(obj)
+        await self.db.commit()
+        await self.db.refresh(obj)
+        return obj
+
+    # --- Videos ---
+
+    async def add_video(self, department_id: uuid.UUID, data: dict):
+        from .models import DepartmentVideo
+        obj = DepartmentVideo(department_id=department_id, **data)
         self.db.add(obj)
         await self.db.commit()
         await self.db.refresh(obj)

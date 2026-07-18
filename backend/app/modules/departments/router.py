@@ -12,6 +12,7 @@ from .schemas import (
     StudentProjectSchema, StudentProjectCreate,
     AlumniStorySchema, AlumniStoryCreate,
     CareerRoadmapSchema, CareerRoadmapCreate,
+    DepartmentVideoSchema, DepartmentVideoCreate,
 )
 
 router = APIRouter(prefix="/departments", tags=["departments"])
@@ -87,3 +88,23 @@ async def add_career_roadmap(
     admin: AdminUser = Depends(get_current_admin),
 ):
     return await DepartmentService(db).add_career_roadmap(slug, payload)
+
+
+@router.post("/{slug}/videos", response_model=DepartmentVideoSchema, status_code=201)
+async def add_video(
+    slug: str,
+    payload: DepartmentVideoCreate,
+    db: AsyncSession = Depends(get_db),
+    admin: AdminUser = Depends(get_current_admin),
+):
+    return await DepartmentService(db).add_video(slug, payload)
+
+
+@router.delete("/{slug}/videos/{video_id}")
+async def delete_video(
+    slug: str,
+    video_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    admin: AdminUser = Depends(get_current_admin),
+):
+    await DepartmentService(db).delete_video(slug, video_id)

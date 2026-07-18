@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import String, Text, Integer, ForeignKey, JSON
+from sqlalchemy import String, Text, Integer, Boolean, ForeignKey, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -38,6 +38,8 @@ class Department(Base):
     suitable_for: Mapped[list] = mapped_column(JSON, default=list)
     job_market_fa: Mapped[str | None] = mapped_column(Text)
     difficulty_level: Mapped[str | None] = mapped_column(String(50))
+    intro_fa: Mapped[str | None] = mapped_column(Text)
+    curriculum: Mapped[list] = mapped_column(JSON, default=list)
 
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(
@@ -48,6 +50,7 @@ class Department(Base):
     student_projects = relationship("StudentProject", back_populates="department")
     alumni_stories = relationship("AlumniStory", back_populates="department")
     career_roadmaps = relationship("CareerRoadmap", back_populates="department")
+    lecture_videos = relationship("DepartmentVideo", back_populates="department")
     cutoffs = relationship("KankorCutoff", back_populates="department")
 
 
@@ -95,3 +98,23 @@ class CareerRoadmap(Base):
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
     department = relationship("Department", back_populates="career_roadmaps")
+
+
+class DepartmentVideo(Base):
+    """ویدیوهای درسی — منبع اصلی: ویدیوهای ترفیع علمی استادان."""
+    __tablename__ = "department_videos"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    department_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("departments.id", ondelete="CASCADE"))
+    title_fa: Mapped[str] = mapped_column(String(300))
+    subject: Mapped[str | None] = mapped_column(String(150))
+    semester: Mapped[int | None] = mapped_column(Integer)
+    lecturer_name: Mapped[str | None] = mapped_column(String(200))
+    video_url: Mapped[str] = mapped_column(String(500))
+    description_fa: Mapped[str | None] = mapped_column(Text)
+    sort_order: Mapped[int] = mapped_column(Integer, default=0)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+
+    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+
+    department = relationship("Department", back_populates="lecture_videos")

@@ -136,6 +136,14 @@ class MockKankorService:
             "time_taken_seconds": time_taken_seconds,
         })
 
+        # Check and award achievements
+        new_badges = []
+        try:
+            from ..achievements.service import AchievementService
+            new_badges = await AchievementService(self.db).check_and_award(session_id)
+        except Exception:
+            pass
+
         return {
             "session_id": session_id,
             "score": score,
@@ -147,6 +155,7 @@ class MockKankorService:
             "subject_scores": subject_scores,
             "passed": score >= 50,
             "time_taken_seconds": time_taken_seconds,
+            "new_badges": new_badges,
         }
 
     async def review_exam(self, session_id: str):

@@ -24,6 +24,7 @@ interface ExamResult {
   subject_scores: Record<string, SubjectScore>;
   passed: boolean;
   time_taken_seconds: number | null;
+  new_badges: string[];
 }
 
 export default function MockResultPage() {
@@ -84,6 +85,20 @@ export default function MockResultPage() {
               <p className="text-muted text-sm mt-1">زمان: {formatTime(result.time_taken_seconds)}</p>
             )}
           </Card>
+
+          {/* New badges */}
+          {result.new_badges && result.new_badges.length > 0 && (
+            <Card className="mb-8 bg-gold-500/10 border-gold-500/30">
+              <h3 className="font-bold text-lg text-foreground mb-3">🏅 نشان جدید گرفتی!</h3>
+              <div className="flex flex-wrap gap-3">
+                {result.new_badges.map((badge: string) => (
+                  <span key={badge} className="px-4 py-2 bg-gold-500/20 text-gold-600 rounded-full text-sm font-medium">
+                    {badge.replace(/_/g, " ")}
+                  </span>
+                ))}
+              </div>
+            </Card>
+          )}
 
           {/* Subject breakdown */}
           {Object.keys(result.subject_scores).length > 0 && (

@@ -65,9 +65,12 @@ export interface DepartmentDetail extends DepartmentListItem {
   suitable_for: string[];
   job_market_fa: string | null;
   difficulty_level: string | null;
+  intro_fa: string | null;
+  curriculum: { semester: number; subjects: string[] }[];
   student_projects: StudentProject[];
   alumni_stories: AlumniStory[];
   career_roadmaps: CareerRoadmap[];
+  lecture_videos: DepartmentVideo[];
 }
 
 export interface CareerPath {
@@ -98,6 +101,17 @@ export interface CareerRoadmap {
   id: string;
   career_title_fa: string;
   steps: RoadmapStep[];
+}
+
+export interface DepartmentVideo {
+  id: string;
+  title_fa: string;
+  subject: string | null;
+  semester: number | null;
+  lecturer_name: string | null;
+  video_url: string;
+  description_fa: string | null;
+  sort_order: number;
 }
 
 export interface RoadmapStep {
