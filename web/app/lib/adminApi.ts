@@ -1,4 +1,5 @@
-const API = "http://localhost:9000/api/v1";
+import { API_BASE } from "./config";
+const API = API_BASE;
 
 // Token management
 let accessToken: string | null = null;

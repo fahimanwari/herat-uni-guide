@@ -5,7 +5,8 @@ import { Header } from "../components/layout/Header";
 import { Footer } from "../components/layout/Footer";
 import { adminApi } from "../lib/adminApi";
 
-const API = "http://localhost:9000/api/v1";
+import { API_BASE, API_ORIGIN } from "../lib/config";
+const API = API_BASE;
 
 export default function AdminPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -202,7 +203,8 @@ export default function AdminPage() {
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-bold text-gray-900">پنل مدیریت</h1>
             <div className="flex gap-2">
-              <a href="http://localhost:9000/docs" target="_blank" className="text-blue-600 hover:underline text-sm">📄 API</a>
+              <a href="${API_ORIGIN}/docs" target="_blank" className="text-blue-600 hover:underline text-sm">📄 API</a>
+              <button onClick={async () => { try { const r = await fetch(`${API}/admin/rag/reindex`, {method:"POST", headers:{"Authorization":`Bearer ${localStorage.getItem("admin_access")}`}}); const d = await r.json(); showMessage(`بازسازی: ${d.chunks_created || 0} chunk`); } catch(e) { showMessage("خطا", "error"); } }} className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700">🤖 بازسازی</button>
               <button onClick={() => { localStorage.clear(); setIsLoggedIn(false); }} className="text-red-600 hover:underline text-sm">خروج</button>
             </div>
           </div>
@@ -263,7 +265,7 @@ export default function AdminPage() {
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-bold">{tabs.find(t => t.id === tab)?.label} ({items.length})</h2>
-                    {!["questions", "results"].includes(tab) && (
+                    {!["questions", "results", "exams"].includes(tab) && (
                       <button onClick={() => openCreate(tab)} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">
                         + افزودن
                       </button>

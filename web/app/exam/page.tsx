@@ -6,7 +6,8 @@ import { Header } from "../components/layout/Header";
 import { Footer } from "../components/layout/Footer";
 import { Card, Button, Badge, SectionTitle } from "../components/ui";
 
-const API = "http://localhost:9000/api/v1";
+import { API_BASE } from "../lib/config";
+const API = API_BASE;
 
 interface Exam {
   id: string;

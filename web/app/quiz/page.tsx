@@ -33,7 +33,7 @@ export default function QuizPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch("http://localhost:9000/api/v1/quiz/questions")
+    fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:9000/api/v1"}/quiz/questions`)
       .then((r) => r.json())
       .then(setQuestions)
       .catch(() => {
@@ -72,7 +72,7 @@ export default function QuizPage() {
     } else {
       // Submit
       setLoading(true);
-      fetch("http://localhost:9000/api/v1/quiz/score", {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:9000/api/v1"}/quiz/score`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ selected_option_ids: newAnswers }),

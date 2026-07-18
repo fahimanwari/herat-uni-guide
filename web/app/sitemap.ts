@@ -4,7 +4,7 @@ const BASE_URL = "https://guide.hu.edu.af";
 
 async function fetchSlugs(path: string): Promise<string[]> {
   try {
-    const res = await fetch(`http://localhost:9000/api/v1/${path}`, {
+    const res = await fetch(`process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:9000/api/v1"/${path}`, {
       next: { revalidate: 3600 },
     });
     if (!res.ok) return [];

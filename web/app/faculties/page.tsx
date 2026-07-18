@@ -7,7 +7,8 @@ import { Footer } from "../components/layout/Footer";
 import { Card, SectionTitle } from "../components/ui";
 import { FacultyListItem } from "../lib/types";
 
-const API = "http://localhost:9000/api/v1";
+import { API_BASE } from "../lib/config";
+const API = API_BASE;
 
 export default function FacultiesPage() {
   const [faculties, setFaculties] = useState<FacultyListItem[]>([]);
