@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Header } from "../../components/layout/Header";
 import { Footer } from "../../components/layout/Footer";
 import { Button, Card, SectionTitle, Badge } from "../../components/ui";
+import { API_BASE } from "../../lib/config";
 
 interface SubjectScore {
   correct: number;
@@ -30,6 +31,8 @@ interface ExamResult {
 export default function MockResultPage() {
   const router = useRouter();
   const [result, setResult] = useState<ExamResult | null>(null);
+  const [studyPlan, setStudyPlan] = useState<string | null>(null);
+  const [loadingPlan, setLoadingPlan] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem("mock_exam_result");
@@ -39,6 +42,23 @@ export default function MockResultPage() {
     }
     setResult(JSON.parse(saved));
   }, [router]);
+
+  const generateStudyPlan = async () => {
+    if (!result) return;
+    setLoadingPlan(true);
+    try {
+      const res = await fetch(`${API_BASE}/ai/study-plan`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_id: result.session_id }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setStudyPlan(data.plan);
+      }
+    } catch {}
+    setLoadingPlan(false);
+  };
 
   if (!result) {
     return (
@@ -60,6 +80,12 @@ export default function MockResultPage() {
     return `${m} دقیقه و ${sec} ثانیه`;
   };
 
+  // Calculate stats
+  const totalCorrect = result.correct_answers;
+  const totalWrong = result.wrong_answers;
+  const totalEmpty = result.empty_answers;
+  const accuracy = result.total_answers > 0 ? Math.round((totalCorrect / result.total_answers) * 100) : 0;
+
   return (
     <>
       <Header />
@@ -68,23 +94,46 @@ export default function MockResultPage() {
           <SectionTitle title="نتیجه کانکور آزمایشی" />
 
           {/* Score card */}
-          <Card className="mb-8 text-center">
-            <div className={`text-6xl font-bold ${scoreColor} mb-2`}>{result.score}%</div>
-            {result.score_360 !== undefined && (
-              <p className="text-foreground text-xl font-bold mb-2">
-                نمره تخمینی کانکور: <span className={scoreColor}>{result.score_360}</span> از ۳۶۰
-              </p>
-            )}
-            <Badge variant={scoreBadge} className="text-lg px-4 py-1">
-              {result.passed ? "قبول" : "نیاز به تلاش بیشتر"}
-            </Badge>
-            <p className="text-muted mt-4">
-              {result.correct_answers} درست | {result.wrong_answers} نادرست | {result.empty_answers} بی‌پاسخ
-            </p>
-            {result.time_taken_seconds && (
-              <p className="text-muted text-sm mt-1">زمان: {formatTime(result.time_taken_seconds)}</p>
-            )}
+          <Card className="mb-8 text-center relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-primary-500 via-accent-500 to-gold-500" />
+            <div className="pt-4">
+              <div className={`text-7xl font-bold ${scoreColor} mb-2`}>{result.score}%</div>
+              {result.score_360 !== undefined && (
+                <p className="text-foreground text-xl font-bold mb-2">
+                  نمره تخمینی کانکور: <span className={scoreColor}>{result.score_360}</span> از ۳۶۰
+                </p>
+              )}
+              <Badge variant={scoreBadge} className="text-lg px-4 py-1">
+                {result.passed ? "قبول" : "نیاز به تلاش بیشتر"}
+              </Badge>
+            </div>
           </Card>
+
+          {/* Stats grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <Card className="text-center">
+              <div className="text-3xl font-bold text-success">{totalCorrect}</div>
+              <p className="text-muted text-sm mt-1">درست</p>
+            </Card>
+            <Card className="text-center">
+              <div className="text-3xl font-bold text-danger">{totalWrong}</div>
+              <p className="text-muted text-sm mt-1">نادرست</p>
+            </Card>
+            <Card className="text-center">
+              <div className="text-3xl font-bold text-muted">{totalEmpty}</div>
+              <p className="text-muted text-sm mt-1">بی‌پاسخ</p>
+            </Card>
+            <Card className="text-center">
+              <div className="text-3xl font-bold text-primary-600">{accuracy}%</div>
+              <p className="text-muted text-sm mt-1">دقت</p>
+            </Card>
+          </div>
+
+          {result.time_taken_seconds && (
+            <Card className="mb-8 text-center">
+              <p className="text-muted">زمان: <span className="font-bold text-foreground">{formatTime(result.time_taken_seconds)}</span></p>
+            </Card>
+          )}
 
           {/* New badges */}
           {result.new_badges && result.new_badges.length > 0 && (
@@ -104,16 +153,18 @@ export default function MockResultPage() {
           {Object.keys(result.subject_scores).length > 0 && (
             <Card className="mb-8">
               <h3 className="font-bold text-lg text-foreground mb-4">تفکیک مضامین</h3>
-              <div className="space-y-3">
-                {Object.entries(result.subject_scores).map(([subj, data]) => (
+              <div className="space-y-4">
+                {Object.entries(result.subject_scores)
+                  .sort(([, a], [, b]) => b.percentage - a.percentage)
+                  .map(([subj, data]) => (
                   <div key={subj}>
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-foreground font-medium">{subj}</span>
                       <span className="text-muted text-sm">{data.correct}/{data.total} ({data.percentage}%)</span>
                     </div>
-                    <div className="h-3 bg-border rounded-full overflow-hidden">
+                    <div className="h-4 bg-border rounded-full overflow-hidden">
                       <div
-                        className={`h-full rounded-full transition-all ${
+                        className={`h-full rounded-full transition-all duration-700 ${
                           data.percentage >= 70 ? "bg-success" : data.percentage >= 50 ? "bg-warning" : "bg-danger"
                         }`}
                         style={{ width: `${data.percentage}%` }}
@@ -126,23 +177,37 @@ export default function MockResultPage() {
           )}
 
           {/* Actions */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
             <Link href={`/mock-kankor/review?session=${result.session_id}`}>
-              <Button variant="outline" size="lg" className="w-full sm:w-auto">
+              <Button variant="outline" size="lg" className="w-full">
                 مرور پاسخ‌ها
               </Button>
             </Link>
             <Link href="/kankor/chance">
-              <Button size="lg" className="w-full sm:w-auto">
+              <Button size="lg" className="w-full">
                 ⭐ چانس قبولی با این نمره
               </Button>
             </Link>
           </div>
 
-          <div className="bg-warning/10 border border-warning/20 rounded-[10px] p-4 mt-6 text-sm text-foreground text-center">
-            ⚠️ محاسبه چانس قبولی بر اساس نمرات قبولی <strong>آخرین سال موجود در سیستم</strong> انجام می‌شود
-            (سال دقیق در صفحه چانس نمایش داده می‌شود). نمره قبولی هر رشته <strong>هر سال متفاوت</strong> است
-            و این نتیجه فقط یک تخمین است، نه تضمین قبولی.
+          {/* Study Plan */}
+          <Card className="mb-8">
+            <h3 className="font-bold text-lg text-foreground mb-3">📅 برنامه مطالعه شخصی</h3>
+            {studyPlan ? (
+              <div className="text-foreground whitespace-pre-line leading-relaxed">{studyPlan}</div>
+            ) : (
+              <div className="text-center">
+                <p className="text-muted mb-4">برنامه مطالعه شخصی بر اساس نقاط ضعف شما بسازید</p>
+                <Button onClick={generateStudyPlan} loading={loadingPlan} variant="outline">
+                  ساخت برنامه مطالعه
+                </Button>
+              </div>
+            )}
+          </Card>
+
+          {/* Disclaimer */}
+          <div className="bg-warning/10 border border-warning/20 rounded-[10px] p-4 text-sm text-foreground text-center">
+            ⚠️ محاسبه چانس قبولی بر اساس نمرات قبولی <strong>آخرین سال موجود در سیستم</strong> انجام می‌شود. نمره قبولی هر رشته <strong>هر سال متفاوت</strong> است و این نتیجه فقط یک تخمین است.
           </div>
 
           <div className="text-center mt-6">
