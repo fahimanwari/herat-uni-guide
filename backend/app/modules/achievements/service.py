@@ -10,6 +10,7 @@ from .schemas import AchievementSchema
 
 class AchievementService:
     def __init__(self, db: AsyncSession):
+        self.db = db
         self.repo = AchievementRepository(db)
 
     async def check_and_award(self, session_id: str) -> list[str]:

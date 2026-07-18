@@ -77,6 +77,6 @@ class StudyPlanService:
             for subj, score in weak_subjects:
                 hours = 3 if score < 50 else 2
                 lines.append(f"  - {subj}: {hours} ساعت ({'تمرین' if score < 50 else 'مرور'})")
-            lines.append(f"  - آزمون آزمایشی کامل")
+            lines.append("  - آزمون آزمایشی کامل")
             lines.append("")
         return "\n".join(lines)

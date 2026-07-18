@@ -1,3 +1,5 @@
+import json
+import re
 import uuid
 from fastapi import APIRouter, Depends, Query, Request
 from pydantic import BaseModel
@@ -118,8 +120,6 @@ async def ocr_extract(
 
     try:
         result = await provider.chat_with_image(prompt, payload.image_base64)
-        # Try to parse JSON from response
-        import json
         # Find JSON array in response
         match = re.search(r'\[.*\]', result, re.DOTALL)
         if match:
@@ -128,6 +128,3 @@ async def ocr_extract(
         return {"error": "فرمت پاسخ AI قابل پردازش نیست", "raw": result, "questions": []}
     except Exception as e:
         return {"error": f"خطا در استخراج: {str(e)}", "questions": []}
-
-
-import re

@@ -81,6 +81,7 @@ class MockExamResult(BaseModel):
     subject_scores: dict
     passed: bool
     time_taken_seconds: int | None
+    new_badges: list[str] = []  # نشان‌های تازه کسب‌شده در همین آزمون
 
 
 class MockExamReview(BaseModel):

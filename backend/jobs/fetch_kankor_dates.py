@@ -75,7 +75,7 @@ async def fetch_kankor_dates():
                 except Exception as e:
                     print(f"  Error: {e}")
 
-        print(f"\nNote: This script identifies potential event pages.")
+        print("\nNote: This script identifies potential event pages.")
         print("For accurate date extraction, use AI provider or manual entry.")
         print(f"New events: {new_count}, Skipped: {skip_count}")
 

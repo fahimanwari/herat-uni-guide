@@ -3,10 +3,12 @@ from pydantic import BaseModel, ConfigDict
 
 
 class AchievementSchema(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+    """Matches the dict shape built in AchievementService.get_achievements —
+    clients need the display name/emoji, not the row id."""
 
-    id: uuid.UUID
     badge_key: str
+    name: str
+    emoji: str
     earned_at: str
 
 

@@ -11,6 +11,7 @@ from app.modules.question_bank.models import QuestionBank
 class MockKankorService:
 
     def __init__(self, db: AsyncSession):
+        self.db = db
         self.repo = MockKankorRepository(db)
 
     async def start_exam(
@@ -136,13 +137,16 @@ class MockKankorService:
             "time_taken_seconds": time_taken_seconds,
         })
 
-        # Check and award achievements
+        # Check and award achievements. A failure here must never break exam
+        # submission itself, but it must not be silent either — the bare
+        # `except: pass` previously hid an AttributeError for weeks.
         new_badges = []
         try:
             from ..achievements.service import AchievementService
             new_badges = await AchievementService(self.db).check_and_award(session_id)
-        except Exception:
-            pass
+        except Exception as e:
+            import logging
+            logging.getLogger("mock_kankor").error("achievement award failed: %s", e)
 
         return {
             "session_id": session_id,

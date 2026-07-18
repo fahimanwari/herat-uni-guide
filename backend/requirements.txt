@@ -9,6 +9,7 @@ passlib[bcrypt]
 redis
 httpx
 pillow
+beautifulsoup4
 sentence-transformers
 pgvector
 pytest

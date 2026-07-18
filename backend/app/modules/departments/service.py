@@ -53,11 +53,14 @@ class DepartmentService:
         return await self.repo.add_video(dept.id, payload.model_dump())
 
     async def delete_video(self, slug: str, video_id: uuid.UUID):
-        from .models import DepartmentVideo
         from sqlalchemy import select
-        q = select(DepartmentVideo).where(DepartmentVideo.id == video_id, DepartmentVideo.department_id == (
-            select(Department.id).where(Department.slug == slug).correlate_except(Department).scalar_subquery()
-        ))
+        from .models import DepartmentVideo
+
+        dept = await self.get_department(slug)
+        q = select(DepartmentVideo).where(
+            DepartmentVideo.id == video_id,
+            DepartmentVideo.department_id == dept.id,
+        )
         obj = (await self.repo.db.execute(q)).scalar_one_or_none()
         if obj is None:
             raise NotFoundError("ویدیو یافت نشد")

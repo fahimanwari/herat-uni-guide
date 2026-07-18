@@ -12,9 +12,19 @@ from app.database import Base
 # Import all models so Alembic can detect them
 from app.modules.universities.models import University
 from app.modules.faculties.models import Faculty
-from app.modules.departments.models import Department, StudentProject, AlumniStory, CareerRoadmap
+from app.modules.departments.models import Department, StudentProject, AlumniStory, CareerRoadmap, DepartmentVideo
 from app.modules.news.models import News
 from app.modules.faqs.models import Faq
+from app.modules.kankor.models import KankorCutoff, KankorGuide
+from app.modules.quiz.models import QuizQuestion, QuizOption, DepartmentTraitProfile
+from app.modules.ai.models import RagChunk, AiChatLog
+from app.modules.admin_auth.models import AdminUser, RefreshToken
+from app.modules.notifications.models import AcademicEvent
+from app.modules.exam.models import Exam, ExamQuestion, ExamOption, ExamResult
+from app.modules.users.models import User
+from app.modules.question_bank.models import QuestionBank, ExamBlueprint
+from app.modules.mock_kankor.models import MockExamSession
+from app.modules.achievements.models import UserAchievement
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.database_url)

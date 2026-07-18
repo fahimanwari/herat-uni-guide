@@ -30,7 +30,6 @@ export function Footer() {
               <li><Link href="/kankor/chance" className="text-primary-200 hover:text-white transition-colors">ماشین حساب چانس</Link></li>
               <li><Link href="/quiz" className="text-primary-200 hover:text-white transition-colors">آزمون انتخاب رشته</Link></li>
               <li><Link href="/chat" className="text-primary-200 hover:text-white transition-colors">مشاور هوش مصنوعی</Link></li>
-              <li><Link href="/campus" className="text-primary-200 hover:text-white transition-colors">نقشه کمپس</Link></li>
             </ul>
           </div>
 

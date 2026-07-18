@@ -21,7 +21,6 @@ const navItems: NavEntry[] = [
   { label: "اخبار", href: "/news" },
   { label: "پرسش‌های متداول", href: "/faq" },
   { label: "مشاور AI", href: "/chat" },
-  { label: "نقشه کمپس", href: "/campus" },
 ];
 
 const languages = [
