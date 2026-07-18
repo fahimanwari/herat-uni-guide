@@ -1,4 +1,6 @@
-from pydantic import BaseModel, EmailStr
+import uuid
+
+from pydantic import BaseModel, ConfigDict, EmailStr
 
 
 class RegisterRequest(BaseModel):
@@ -30,3 +32,21 @@ class UserProfile(BaseModel):
     full_name: str
     phone: str | None
     is_verified: bool
+
+
+# --- Admin ---
+
+class UserListItem(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    email: str
+    full_name: str
+    phone: str | None
+    is_active: bool
+    is_verified: bool
+
+
+class UserUpdate(BaseModel):
+    is_active: bool | None = None
+    is_verified: bool | None = None

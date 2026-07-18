@@ -272,3 +272,21 @@ class ExamService:
         if exam is None:
             raise NotFoundError("امتحان یافت نشد")
         await self.repo.delete(exam)
+
+    # --- Question CRUD ---
+
+    async def add_question(self, exam_id: uuid.UUID, payload):
+        exam = await self.repo.get_exam(exam_id)
+        if exam is None:
+            raise NotFoundError("امتحان یافت نشد")
+        data = payload.model_dump(exclude={"options"})
+        question = await self.repo.create_question(exam_id, data)
+        for opt_data in (payload.options or []):
+            await self.repo.create_option(question.id, opt_data.model_dump())
+        return question
+
+    async def delete_question(self, question_id: uuid.UUID):
+        question = await self.repo.get_question(question_id)
+        if question is None:
+            raise NotFoundError("سوال یافت نشد")
+        await self.repo.delete_question(question)

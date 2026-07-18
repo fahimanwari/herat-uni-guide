@@ -31,6 +31,9 @@ class DepartmentDetail(DepartmentListItem):
     suitable_for: list
     job_market_fa: str | None
     difficulty_level: str | None
+    student_projects: list[StudentProjectSchema] = []
+    alumni_stories: list[AlumniStorySchema] = []
+    career_roadmaps: list[CareerRoadmapSchema] = []
 
 
 class DepartmentCreate(BaseModel):

@@ -253,8 +253,8 @@ export default function ExamPage() {
                         ? "bg-primary-600 text-white"
                         : "bg-primary-200 text-primary-700"
                       : i === currentQ
-                      ? "bg-gray-400 text-white"
-                      : "bg-gray-200 text-gray-600"
+                      ? "bg-primary-400 text-white"
+                      : "bg-primary-100 text-primary-700"
                   }`}
                 >
                   {i + 1}

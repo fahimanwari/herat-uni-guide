@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Header } from "../components/layout/Header";
 import { Footer } from "../components/layout/Footer";
 import { Button, Card, Badge, SectionTitle } from "../components/ui";
+import { API_BASE } from "../lib/config";
 
 interface QuizOption {
   id: string;
@@ -33,7 +34,7 @@ export default function QuizPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:9000/api/v1"}/quiz/questions`)
+    fetch(`${API_BASE}/quiz/questions`)
       .then((r) => r.json())
       .then(setQuestions)
       .catch(() => {
@@ -72,7 +73,7 @@ export default function QuizPage() {
     } else {
       // Submit
       setLoading(true);
-      fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:9000/api/v1"}/quiz/score`, {
+      fetch(`${API_BASE}/quiz/score`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ selected_option_ids: newAnswers }),

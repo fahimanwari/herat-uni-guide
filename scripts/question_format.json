@@ -1,0 +1,16 @@
+{
+  "subject": "ریاضی",
+  "year": 1402,
+  "grade": "11",
+  "chapter": "معادلات درجه اول",
+  "source": "کانکور ۱۴۰۲ دور اول",
+  "difficulty": "medium",
+  "question_fa": "مقدار x در معادله 2x + 5 = 15 برابر است با:",
+  "options": [
+    {"text": "5", "is_correct": true},
+    {"text": "10"},
+    {"text": "7.5"},
+    {"text": "2.5"}
+  ],
+  "explanation_fa": "2x + 5 = 15 → 2x = 10 → x = 5"
+}

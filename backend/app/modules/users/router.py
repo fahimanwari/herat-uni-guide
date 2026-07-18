@@ -1,17 +1,22 @@
-from fastapi import APIRouter, Depends, Request
+import uuid
+from fastapi import APIRouter, Depends, Request, Query
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_db
+from app.core.security import get_current_admin
 from app.core.rate_limit import rate_limiter
+from app.modules.admin_auth.models import AdminUser
 from .service import UserService
-from .schemas import RegisterRequest, LoginRequest, TokenResponse, RefreshRequest
+from .schemas import RegisterRequest, LoginRequest, TokenResponse, RefreshRequest, UserListItem, UserUpdate
 
 router = APIRouter(prefix="/users", tags=["users"])
 
 
+# --- Public ---
+
 @router.post("/register", response_model=TokenResponse)
 async def register(payload: RegisterRequest, request: Request, db: AsyncSession = Depends(get_db)):
-    # Rate limit: 3 registrations per minute per IP
     client_ip = request.client.host
     await rate_limiter.check_rate_limit(f"register:{client_ip}", limit=3, window=60)
     return await UserService(db).register(
@@ -21,7 +26,6 @@ async def register(payload: RegisterRequest, request: Request, db: AsyncSession 
 
 @router.post("/login", response_model=TokenResponse)
 async def login(payload: LoginRequest, request: Request, db: AsyncSession = Depends(get_db)):
-    # Rate limit: 5 login attempts per minute per IP
     client_ip = request.client.host
     await rate_limiter.check_rate_limit(f"login:{client_ip}", limit=5, window=60)
     return await UserService(db).login(payload.email, payload.password)
@@ -30,3 +34,34 @@ async def login(payload: LoginRequest, request: Request, db: AsyncSession = Depe
 @router.post("/refresh", response_model=TokenResponse)
 async def refresh(payload: RefreshRequest, db: AsyncSession = Depends(get_db)):
     return await UserService(db).refresh(payload.refresh_token)
+
+
+# --- Admin ---
+
+@router.get("/admin/list", response_model=list[UserListItem])
+async def list_users(
+    db: AsyncSession = Depends(get_db),
+    admin: AdminUser = Depends(get_current_admin),
+):
+    from .models import User
+    q = select(User).order_by(User.created_at.desc())
+    return list((await db.execute(q)).scalars())
+
+
+@router.patch("/admin/{user_id}")
+async def update_user(
+    user_id: uuid.UUID,
+    payload: UserUpdate,
+    db: AsyncSession = Depends(get_db),
+    admin: AdminUser = Depends(get_current_admin),
+):
+    from .models import User
+    from app.core.exceptions import NotFoundError
+    user = await db.get(User, user_id)
+    if user is None:
+        raise NotFoundError("کاربر یافت نشد")
+    for key, value in payload.model_dump(exclude_unset=True).items():
+        setattr(user, key, value)
+    await db.commit()
+    await db.refresh(user)
+    return {"id": str(user.id), "email": user.email, "is_active": user.is_active}

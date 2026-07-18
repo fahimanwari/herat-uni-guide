@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Header } from "../../components/layout/Header";
 import { Footer } from "../../components/layout/Footer";
 import { Button, Card, SectionTitle, Badge } from "../../components/ui";
+import { API_BASE } from "../../lib/config";
 
 interface ChanceResult {
   department_slug: string;
@@ -12,6 +13,7 @@ interface ChanceResult {
   last_min_score: number;
   avg_min_score: number;
   trend: string;
+  data_year?: number;
 }
 
 export default function ChancePage() {
@@ -24,7 +26,7 @@ export default function ChancePage() {
     setLoading(true);
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:9000/api/v1"}/kankor/chances?score=${score}`
+        `${API_BASE}/kankor/chances?score=${score}`
       );
       if (res.ok) {
         setResults(await res.json());
@@ -98,9 +100,16 @@ export default function ChancePage() {
             </div>
           </Card>
 
-          {/* Disclaimer */}
+          {/* Disclaimer — سال مبنای محاسبه از خود دیتا خوانده می‌شود */}
           <div className="bg-warning/10 border border-warning/20 rounded-[10px] p-4 mb-8 text-sm text-foreground">
-            ⚠️ این فقط تخمین بر اساس سال‌های گذشته است، تضمین قبولی نیست.
+            {results.length > 0 && results.some((r) => r.data_year) ? (
+              <>
+                ⚠️ این تخمین بر اساس نمرات قبولی <strong>سال {Math.max(...results.filter((r) => r.data_year).map((r) => r.data_year!))}</strong> است.
+                نمره قبولی هر رشته <strong>هر سال متفاوت</strong> است (وابسته به تعداد داوطلبان و ظرفیت) — این نتیجه تضمین قبولی نیست.
+              </>
+            ) : (
+              <>⚠️ این فقط تخمین بر اساس نمرات قبولی سال‌های گذشته است — نمره قبولی هر سال متفاوت است و تضمین قبولی نیست.</>
+            )}
           </div>
 
           {/* Results */}
@@ -116,7 +125,7 @@ export default function ChancePage() {
                           {r.department_name}
                         </h3>
                         <p className="text-muted text-sm mt-1">
-                          کات‌آف آخر: {r.last_min_score} | میانگین: {r.avg_min_score}
+                          کات‌آف {r.data_year ? `سال ${r.data_year}` : "آخر"}: {r.last_min_score} | میانگین: {r.avg_min_score}
                         </p>
                         <p className="text-muted text-sm">
                           روند: {trendLabels[r.trend as keyof typeof trendLabels] || r.trend}

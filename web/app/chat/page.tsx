@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Header } from "../components/layout/Header";
 import { Footer } from "../components/layout/Footer";
 import { Button, Card, Badge } from "../components/ui";
+import { API_BASE } from "../lib/config";
 
 interface Message {
   role: "user" | "assistant";
@@ -52,7 +53,7 @@ export default function ChatPage() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:9000/api/v1"}/ai/chat`, {
+      const res = await fetch(`${API_BASE}/ai/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -75,6 +75,19 @@ async function authFetch(url: string, options: RequestInit = {}): Promise<Respon
   return res;
 }
 
+// Extracts the real server-side error message (FastAPI `detail`) instead of
+// a bare status code, so the admin panel can show what actually went wrong.
+async function errorMessage(res: Response, fallback: string): Promise<string> {
+  try {
+    const body = await res.json();
+    if (typeof body.detail === "string") return body.detail;
+    if (Array.isArray(body.detail)) {
+      return body.detail.map((d: any) => d.msg || JSON.stringify(d)).join("؛ ");
+    }
+  } catch {}
+  return `${fallback} (کد ${res.status})`;
+}
+
 // API functions
 export const adminApi = {
   // Auth
@@ -84,7 +97,7 @@ export const adminApi = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
-    if (!res.ok) throw new Error("Login failed");
+    if (!res.ok) throw new Error(await errorMessage(res, "ورود ناموفق"));
     const data = await res.json();
     setTokens(data.access_token, data.refresh_token);
     return data;
@@ -93,14 +106,14 @@ export const adminApi = {
   // List
   async list(endpoint: string) {
     const res = await authFetch(`${API}${endpoint}`);
-    if (!res.ok) throw new Error(`Failed to list: ${res.status}`);
+    if (!res.ok) throw new Error(await errorMessage(res, "خطا در بارگذاری"));
     return res.json();
   },
 
   // Get
   async get(endpoint: string) {
     const res = await authFetch(`${API}${endpoint}`);
-    if (!res.ok) throw new Error(`Failed to get: ${res.status}`);
+    if (!res.ok) throw new Error(await errorMessage(res, "خطا در بارگذاری"));
     return res.json();
   },
 
@@ -110,7 +123,7 @@ export const adminApi = {
       method: "POST",
       body: JSON.stringify(data),
     });
-    if (!res.ok) throw new Error(`Failed to create: ${res.status}`);
+    if (!res.ok) throw new Error(await errorMessage(res, "خطا در ایجاد"));
     return res.json();
   },
 
@@ -120,7 +133,7 @@ export const adminApi = {
       method: "PATCH",
       body: JSON.stringify(data),
     });
-    if (!res.ok) throw new Error(`Failed to update: ${res.status}`);
+    if (!res.ok) throw new Error(await errorMessage(res, "خطا در ویرایش"));
     return res.json();
   },
 
@@ -129,7 +142,7 @@ export const adminApi = {
     const res = await authFetch(`${API}${endpoint}`, {
       method: "DELETE",
     });
-    if (!res.ok) throw new Error(`Failed to delete: ${res.status}`);
+    if (!res.ok) throw new Error(await errorMessage(res, "خطا در حذف"));
     return true;
   },
 };

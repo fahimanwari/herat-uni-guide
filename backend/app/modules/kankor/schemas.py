@@ -38,6 +38,13 @@ class GuideCreate(BaseModel):
     sort_order: int = 0
 
 
+class GuideUpdate(BaseModel):
+    title_fa: str | None = None
+    body_fa: str | None = None
+    category: str | None = None
+    sort_order: int | None = None
+
+
 class ChanceResult(BaseModel):
     department_slug: str
     department_name: str
@@ -46,4 +53,5 @@ class ChanceResult(BaseModel):
     last_min_score: float
     avg_min_score: float
     trend: str  # "rising" | "stable" | "falling"
+    data_year: int  # سال آخرین کات‌آف مبنای محاسبه — نمرات قبولی هر سال متفاوت است
     cutoffs: list[CutoffSchema]

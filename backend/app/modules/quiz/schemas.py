@@ -28,3 +28,22 @@ class QuizMatch(BaseModel):
 
 class ScoreRequest(BaseModel):
     selected_option_ids: list[uuid.UUID]
+
+
+# --- Department Trait Profiles ---
+
+class TraitProfileSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    department_id: uuid.UUID
+    trait_weights: dict
+
+
+class TraitProfileCreate(BaseModel):
+    department_id: uuid.UUID
+    trait_weights: dict
+
+
+class TraitProfileUpdate(BaseModel):
+    trait_weights: dict | None = None

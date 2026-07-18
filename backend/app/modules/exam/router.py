@@ -9,6 +9,7 @@ from .service import ExamService
 from .schemas import (
     ExamListItem, ExamDetail, ExamWithQuestions, ExamCreate,
     SubmitExamRequest, ExamResultResponse, UserStats,
+    ExamQuestionCreate,
 )
 
 router = APIRouter(prefix="/exam", tags=["exam"])
@@ -86,3 +87,24 @@ async def delete_exam(
     admin=Depends(get_current_admin),
 ):
     return await ExamService(db).delete_exam(exam_id)
+
+
+# --- Admin: Question Management ---
+
+@router.post("/{exam_id}/questions")
+async def add_question(
+    exam_id: uuid.UUID,
+    payload: ExamQuestionCreate,
+    db: AsyncSession = Depends(get_db),
+    admin=Depends(get_current_admin),
+):
+    return await ExamService(db).add_question(exam_id, payload)
+
+
+@router.delete("/questions/{question_id}")
+async def delete_question(
+    question_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    admin=Depends(get_current_admin),
+):
+    await ExamService(db).delete_question(question_id)

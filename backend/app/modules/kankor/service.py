@@ -1,5 +1,8 @@
+import uuid
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.exceptions import NotFoundError
 from .repository import KankorRepository
 from .schemas import ChanceResult
 
@@ -36,6 +39,7 @@ class KankorService:
                 last_min_score=last,
                 avg_min_score=round(avg, 1),
                 trend=trend,
+                data_year=cutoffs[-1].year,
                 cutoffs=sorted(cutoffs, key=lambda c: c.year),
             ))
 
@@ -70,5 +74,35 @@ class KankorService:
         obj = (await self.repo.db.execute(q)).scalar_one_or_none()
         if obj is None:
             raise NotFoundError("کات‌آف یافت نشد")
-        await self.repo.db.delete(obj)
-        await self.repo.db.commit()
+        await self.repo.delete_cutoff(obj)
+
+    async def update_cutoff(self, id: uuid.UUID, payload):
+        from .models import KankorCutoff
+        from sqlalchemy import select
+        q = select(KankorCutoff).where(KankorCutoff.id == id)
+        obj = (await self.repo.db.execute(q)).scalar_one_or_none()
+        if obj is None:
+            raise NotFoundError("کات‌آف یافت نشد")
+        return await self.repo.update_cutoff(obj, payload.model_dump(exclude_unset=True))
+
+    # --- Guide CRUD ---
+
+    async def list_guides(self):
+        return await self.repo.list_guides()
+
+    async def get_guide(self, id: uuid.UUID):
+        guide = await self.repo.get_guide(id)
+        if guide is None:
+            raise NotFoundError("راهنما یافت نشد")
+        return guide
+
+    async def create_guide(self, payload):
+        return await self.repo.create_guide(payload.model_dump())
+
+    async def update_guide(self, id: uuid.UUID, payload):
+        guide = await self.get_guide(id)
+        return await self.repo.update_guide(guide, payload.model_dump(exclude_unset=True))
+
+    async def delete_guide(self, id: uuid.UUID):
+        guide = await self.get_guide(id)
+        await self.repo.delete_guide(guide)

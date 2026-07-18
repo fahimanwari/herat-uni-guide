@@ -29,11 +29,13 @@ async def generate_exam(payload: GenerateExamRequest, db: AsyncSession = Depends
 @router.get("/questions")
 async def list_questions(
     subject: str | None = None,
-    limit: int = Query(50, le=200),
+    year: int | None = None,
+    grade: str | None = None,
+    limit: int = Query(50, le=500),
     offset: int = 0,
     db: AsyncSession = Depends(get_db),
 ):
-    return await QuestionBankService(db).list_questions(subject, limit, offset)
+    return await QuestionBankService(db).list_questions(subject, limit, offset, year=year, grade=grade)
 
 
 # --- Admin CRUD (requires auth) ---
@@ -68,7 +70,7 @@ async def delete_question(
 
 @router.post("/import")
 async def import_questions(
-    questions: list[QuestionBankItem],
+    questions: list[dict],
     db: AsyncSession = Depends(get_db),
     admin=Depends(get_current_admin),
 ):

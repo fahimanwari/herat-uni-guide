@@ -24,8 +24,8 @@ class Exam(Base):
 
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
-    questions = relationship("ExamQuestion", back_populates="exam")
-    results = relationship("ExamResult", back_populates="exam")
+    questions = relationship("ExamQuestion", back_populates="exam", cascade="all, delete-orphan")
+    results = relationship("ExamResult", back_populates="exam", cascade="all, delete-orphan")
 
 
 class ExamQuestion(Base):
@@ -42,7 +42,7 @@ class ExamQuestion(Base):
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
     exam = relationship("Exam", back_populates="questions")
-    options = relationship("ExamOption", back_populates="question")
+    options = relationship("ExamOption", back_populates="question", cascade="all, delete-orphan")
 
 
 class ExamOption(Base):

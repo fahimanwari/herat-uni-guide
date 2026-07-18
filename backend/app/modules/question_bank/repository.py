@@ -12,14 +12,32 @@ class QuestionBankRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def count_questions(self, subject: str | None = None, difficulty: str | None = None) -> int:
+    async def count_questions(
+        self,
+        subject: str | None = None,
+        difficulty: str | None = None,
+        verified_only: bool = False,
+    ) -> int:
         q = select(func.count(QuestionBank.id)).where(QuestionBank.is_active == True)
         if subject:
             q = q.where(QuestionBank.subject == subject)
         if difficulty:
             q = q.where(QuestionBank.difficulty == difficulty)
+        if verified_only:
+            q = q.where(QuestionBank.is_verified == True)
         result = (await self.db.execute(q)).scalar()
         return result or 0
+
+    async def count_grouped(self, column) -> dict:
+        """Counts of active questions grouped by a column (e.g. year, grade)."""
+        q = (
+            select(column, func.count(QuestionBank.id))
+            .where(QuestionBank.is_active == True)
+            .group_by(column)
+            .order_by(column)
+        )
+        rows = (await self.db.execute(q)).all()
+        return {str(k) if k is not None else "نامشخص": v for k, v in rows}
 
     async def get_random_questions(
         self,
@@ -62,12 +80,14 @@ class QuestionBankRepository:
         return obj
 
     async def bulk_create(self, items: list[dict]) -> int:
-        count = 0
-        for item in items:
-            self.db.add(QuestionBank(**item))
-            count += 1
-        await self.db.commit()
-        return count
+        try:
+            for item in items:
+                self.db.add(QuestionBank(**item))
+            await self.db.commit()
+        except Exception:
+            await self.db.rollback()
+            raise
+        return len(items)
 
     async def update(self, obj: QuestionBank, data: dict) -> QuestionBank:
         for key, value in data.items():

@@ -23,7 +23,8 @@ class ExamRepository:
         q = (
             select(Exam)
             .options(
-                selectinload(Exam.questions).selectinload(ExamQuestion.options)
+                selectinload(Exam.questions).selectinload(ExamQuestion.options),
+                selectinload(Exam.results),
             )
             .where(Exam.id == id)
         )
@@ -92,5 +93,37 @@ class ExamRepository:
         return obj
 
     async def delete(self, obj: Exam) -> None:
+        await self.db.delete(obj)
+        await self.db.commit()
+
+    # --- Question CRUD ---
+
+    async def create_question(self, exam_id: uuid.UUID, data: dict) -> ExamQuestion:
+        obj = ExamQuestion(exam_id=exam_id, **data)
+        self.db.add(obj)
+        await self.db.commit()
+        await self.db.refresh(obj)
+        return obj
+
+    async def get_question(self, question_id: uuid.UUID) -> ExamQuestion | None:
+        q = (
+            select(ExamQuestion)
+            .options(selectinload(ExamQuestion.options))
+            .where(ExamQuestion.id == question_id)
+        )
+        return (await self.db.execute(q)).scalar_one_or_none()
+
+    async def delete_question(self, obj: ExamQuestion) -> None:
+        await self.db.delete(obj)
+        await self.db.commit()
+
+    async def create_option(self, question_id: uuid.UUID, data: dict) -> ExamOption:
+        obj = ExamOption(question_id=question_id, **data)
+        self.db.add(obj)
+        await self.db.commit()
+        await self.db.refresh(obj)
+        return obj
+
+    async def delete_option(self, obj: ExamOption) -> None:
         await self.db.delete(obj)
         await self.db.commit()

@@ -181,6 +181,80 @@ export default async function DepartmentPage({
               </Card>
             </section>
           )}
+
+          {/* Student Projects */}
+          {department.student_projects && department.student_projects.length > 0 && (
+            <section className="mb-8">
+              <SectionTitle title="پروژه‌های دانشجویی" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {department.student_projects.map((p) => (
+                  <Card key={p.id}>
+                    <h4 className="font-bold text-foreground">{p.title_fa}</h4>
+                    <p className="text-muted text-sm mt-2">{p.description_fa}</p>
+                    {p.students && <p className="text-muted text-xs mt-2">دانشجویان: {p.students}</p>}
+                    {p.year && <Badge variant="neutral" className="mt-2">{p.year}</Badge>}
+                  </Card>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Alumni Stories */}
+          {department.alumni_stories && department.alumni_stories.length > 0 && (
+            <section className="mb-8">
+              <SectionTitle title="داستان فارغان" />
+              <div className="space-y-4">
+                {department.alumni_stories.map((a) => (
+                  <Card key={a.id}>
+                    <div className="flex items-start gap-4">
+                      <div className="flex-1">
+                        <h4 className="font-bold text-foreground">{a.full_name}</h4>
+                        <p className="text-muted text-sm">{a.current_position} — فارغ سال {a.graduation_year}</p>
+                        <p className="text-foreground mt-2 leading-relaxed">{a.story_fa}</p>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Career Roadmaps */}
+          {department.career_roadmaps && department.career_roadmaps.length > 0 && (
+            <section className="mb-8">
+              <SectionTitle title="نقشه راه شغلی" />
+              <div className="space-y-6">
+                {department.career_roadmaps.map((r) => (
+                  <Card key={r.id}>
+                    <h4 className="font-bold text-foreground mb-4">{r.career_title_fa}</h4>
+                    <div className="relative">
+                      {r.steps.map((step: any, i: number) => (
+                        <div key={i} className="flex gap-4 mb-4 last:mb-0">
+                          <div className="flex flex-col items-center">
+                            <div className="w-8 h-8 rounded-full bg-primary-600 text-white flex items-center justify-center text-sm font-bold shrink-0">{i + 1}</div>
+                            {i < r.steps.length - 1 && <div className="w-0.5 flex-1 bg-primary-200 mt-1" />}
+                          </div>
+                          <div className="pb-4">
+                            <h5 className="font-medium text-foreground">{step.title}</h5>
+                            {step.desc && <p className="text-muted text-sm mt-1">{step.desc}</p>}
+                            {step.resources && step.resources.length > 0 && (
+                              <div className="flex flex-wrap gap-2 mt-2">
+                                {step.resources.map((res: any, j: number) => (
+                                  <a key={j} href={res.url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary-600 hover:text-primary-700 bg-primary-50 px-2 py-1 rounded">
+                                    {res.name}
+                                  </a>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
       </main>
       <Footer />

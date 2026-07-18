@@ -45,3 +45,30 @@ class QuizRepository:
             .where(Department.department_type == "degree")
         )
         return list((await self.db.execute(q)).all())
+
+    # --- Profile CRUD ---
+
+    async def list_profiles(self) -> list[DepartmentTraitProfile]:
+        q = select(DepartmentTraitProfile).order_by(DepartmentTraitProfile.id)
+        return list((await self.db.execute(q)).scalars())
+
+    async def get_profile(self, id: uuid.UUID) -> DepartmentTraitProfile | None:
+        return await self.db.get(DepartmentTraitProfile, id)
+
+    async def create_profile(self, data: dict) -> DepartmentTraitProfile:
+        obj = DepartmentTraitProfile(**data)
+        self.db.add(obj)
+        await self.db.commit()
+        await self.db.refresh(obj)
+        return obj
+
+    async def update_profile(self, obj: DepartmentTraitProfile, data: dict) -> DepartmentTraitProfile:
+        for key, value in data.items():
+            setattr(obj, key, value)
+        await self.db.commit()
+        await self.db.refresh(obj)
+        return obj
+
+    async def delete_profile(self, obj: DepartmentTraitProfile) -> None:
+        await self.db.delete(obj)
+        await self.db.commit()

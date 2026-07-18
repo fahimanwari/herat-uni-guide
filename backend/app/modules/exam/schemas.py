@@ -9,7 +9,7 @@ class OptionSchema(BaseModel):
 
     id: uuid.UUID
     text_fa: str
-    text_en: str | None
+    text_en: str | None = None
 
 
 class QuestionSchema(BaseModel):
@@ -17,10 +17,10 @@ class QuestionSchema(BaseModel):
 
     id: uuid.UUID
     question_fa: str
-    question_en: str | None
+    question_en: str | None = None
     sort_order: int
     points: int
-    subject: str | None
+    subject: str | None = None
     options: list[OptionSchema]
 
 
@@ -107,3 +107,20 @@ class UserStats(BaseModel):
     subject_averages: dict
     improvement_trend: str  # 'improving', 'stable', 'declining'
     rank_estimate: str  # 'top 10%', 'top 25%', etc.
+
+
+# --- Exam Question Management ---
+
+class ExamQuestionCreate(BaseModel):
+    question_fa: str
+    question_en: str | None = None
+    sort_order: int = 0
+    points: int = 1
+    subject: str | None = None
+    options: list[OptionSchema] = []
+
+
+class ExamQuestionOptionCreate(BaseModel):
+    text_fa: str
+    text_en: str | None = None
+    is_correct: bool = False

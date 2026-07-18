@@ -65,6 +65,9 @@ export interface DepartmentDetail extends DepartmentListItem {
   suitable_for: string[];
   job_market_fa: string | null;
   difficulty_level: string | null;
+  student_projects: StudentProject[];
+  alumni_stories: AlumniStory[];
+  career_roadmaps: CareerRoadmap[];
 }
 
 export interface CareerPath {

@@ -35,6 +35,17 @@ class KankorRepository:
         await self.db.refresh(obj)
         return obj
 
+    async def update_guide(self, obj: KankorGuide, data: dict) -> KankorGuide:
+        for key, value in data.items():
+            setattr(obj, key, value)
+        await self.db.commit()
+        await self.db.refresh(obj)
+        return obj
+
+    async def delete_guide(self, obj: KankorGuide) -> None:
+        await self.db.delete(obj)
+        await self.db.commit()
+
     # --- Cutoff CRUD ---
 
     async def list_cutoffs(self, department_id: uuid.UUID | None = None) -> list[KankorCutoff]:
@@ -46,6 +57,13 @@ class KankorRepository:
     async def create_cutoff(self, data: dict) -> KankorCutoff:
         obj = KankorCutoff(**data)
         self.db.add(obj)
+        await self.db.commit()
+        await self.db.refresh(obj)
+        return obj
+
+    async def update_cutoff(self, obj: KankorCutoff, data: dict) -> KankorCutoff:
+        for key, value in data.items():
+            setattr(obj, key, value)
         await self.db.commit()
         await self.db.refresh(obj)
         return obj

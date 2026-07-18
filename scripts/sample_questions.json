@@ -1,0 +1,72 @@
+[
+  {
+    "subject": "ریاضی",
+    "year": 1403,
+    "source": "کانکور ۱۴۰۳",
+    "difficulty": "easy",
+    "question_fa": "حاصل ۳ × ۴ برابر است با:",
+    "options": [
+      {"text": "7", "is_correct": false},
+      {"text": "12", "is_correct": true},
+      {"text": "14", "is_correct": false},
+      {"text": "16", "is_correct": false}
+    ],
+    "explanation_fa": "۳ × ۴ = ۱۲"
+  },
+  {
+    "subject": "ریاضی",
+    "year": 1403,
+    "source": "کانکور ۱۴۰۳",
+    "difficulty": "medium",
+    "question_fa": "اگر x² = 49 باشد، x برابر است با:",
+    "options": [
+      {"text": "6", "is_correct": false},
+      {"text": "7", "is_correct": true},
+      {"text": "8", "is_correct": false},
+      {"text": "9", "is_correct": false}
+    ],
+    "explanation_fa": "x² = 49 → x = ±7"
+  },
+  {
+    "subject": "فزیک",
+    "year": 1402,
+    "source": "کانکور ۱۴۰۲",
+    "difficulty": "easy",
+    "question_fa": "واحد اندازه‌گیری نیرو در سیستم بین‌المللی چیست؟",
+    "options": [
+      {"text": "ژول", "is_correct": false},
+      {"text": "وات", "is_correct": false},
+      {"text": "نیوتن", "is_correct": true},
+      {"text": "پاسکال", "is_correct": false}
+    ],
+    "explanation_fa": "واحد نیرو نیوتن (N) است"
+  },
+  {
+    "subject": "کیمیا",
+    "year": 1403,
+    "source": "کانکور ۱۴۰۳",
+    "difficulty": "easy",
+    "question_fa": "نماد شیمیایی آب چیست؟",
+    "options": [
+      {"text": "H2O", "is_correct": true},
+      {"text": "CO2", "is_correct": false},
+      {"text": "NaCl", "is_correct": false},
+      {"text": "O2", "is_correct": false}
+    ],
+    "explanation_fa": "آب از دو اتم هیدروژن و یک اتم اکسیژن تشکیل شده: H₂O"
+  },
+  {
+    "subject": "بیولوژی",
+    "year": 1402,
+    "source": "کانکور ۱۴۰۲",
+    "difficulty": "medium",
+    "question_fa": "اندامکی که در سلول‌های گیاهی مسئول فتوسنتز است کدام است؟",
+    "options": [
+      {"text": "میتوکندری", "is_correct": false},
+      {"text": "کلوروپلاست", "is_correct": true},
+      {"text": "ریبوزوم", "is_correct": false},
+      {"text": "هسته", "is_correct": false}
+    ],
+    "explanation_fa": "کلوروپلاست محل فتوسنتز در سلول‌های گیاهی است"
+  }
+]

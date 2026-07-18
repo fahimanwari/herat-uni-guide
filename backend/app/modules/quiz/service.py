@@ -67,3 +67,32 @@ class QuizService:
             raise NotFoundError("سوال یافت نشد")
         await self.repo.db.delete(obj)
         await self.repo.db.commit()
+
+    # --- Profile CRUD ---
+
+    async def list_profiles(self):
+        return await self.repo.list_profiles()
+
+    async def get_profile(self, id: uuid.UUID):
+        from app.core.exceptions import NotFoundError
+        profile = await self.repo.get_profile(id)
+        if profile is None:
+            raise NotFoundError("پروفایل صفات یافت نشد")
+        return profile
+
+    async def create_profile(self, payload):
+        return await self.repo.create_profile(payload.model_dump())
+
+    async def update_profile(self, id: uuid.UUID, payload):
+        from app.core.exceptions import NotFoundError
+        profile = await self.repo.get_profile(id)
+        if profile is None:
+            raise NotFoundError("پروفایل صفات یافت نشد")
+        return await self.repo.update_profile(profile, payload.model_dump(exclude_unset=True))
+
+    async def delete_profile(self, id: uuid.UUID):
+        from app.core.exceptions import NotFoundError
+        profile = await self.repo.get_profile(id)
+        if profile is None:
+            raise NotFoundError("پروفایل صفات یافت نشد")
+        await self.repo.delete_profile(profile)
