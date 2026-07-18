@@ -68,3 +68,14 @@ class QuestionBankRepository:
             count += 1
         await self.db.commit()
         return count
+
+    async def update(self, obj: QuestionBank, data: dict) -> QuestionBank:
+        for key, value in data.items():
+            setattr(obj, key, value)
+        await self.db.commit()
+        await self.db.refresh(obj)
+        return obj
+
+    async def delete(self, obj: QuestionBank) -> None:
+        await self.db.delete(obj)
+        await self.db.commit()

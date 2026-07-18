@@ -14,6 +14,15 @@ class QuestionBankItem(BaseModel):
     source: str | None
 
 
+class QuestionBankCreate(BaseModel):
+    subject: str
+    difficulty: str = "medium"
+    question_fa: str
+    options: list[dict] = []
+    source: str | None = None
+    explanation_fa: str | None = None
+
+
 class GenerateExamRequest(BaseModel):
     subject: str | None = None  # None = random from all
     num_questions: int = 10

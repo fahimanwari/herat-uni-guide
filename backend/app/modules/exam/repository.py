@@ -74,3 +74,23 @@ class ExamRepository:
             .order_by(ExamResult.created_at.desc())
         )
         return list((await self.db.execute(q)).scalars())
+
+    # --- CRUD ---
+
+    async def create(self, data: dict) -> Exam:
+        obj = Exam(**data)
+        self.db.add(obj)
+        await self.db.commit()
+        await self.db.refresh(obj)
+        return obj
+
+    async def update(self, obj: Exam, data: dict) -> Exam:
+        for key, value in data.items():
+            setattr(obj, key, value)
+        await self.db.commit()
+        await self.db.refresh(obj)
+        return obj
+
+    async def delete(self, obj: Exam) -> None:
+        await self.db.delete(obj)
+        await self.db.commit()

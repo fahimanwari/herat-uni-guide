@@ -1,5 +1,6 @@
 import uuid
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .repository import QuizRepository, cosine_similarity
@@ -31,3 +32,38 @@ class QuizService:
                 percent=round(sim * 100),
             ))
         return sorted(matches, key=lambda m: -m.percent)[:5]
+
+    # --- CRUD ---
+
+    async def create_question(self, payload):
+        data = payload.model_dump()
+        data["id"] = uuid.uuid4()
+        from .models import QuizQuestion
+        obj = QuizQuestion(**data)
+        self.repo.db.add(obj)
+        await self.repo.db.commit()
+        await self.repo.db.refresh(obj)
+        return obj
+
+    async def update_question(self, id: uuid.UUID, payload):
+        from .models import QuizQuestion
+        q = select(QuizQuestion).where(QuizQuestion.id == id)
+        obj = (await self.repo.db.execute(q)).scalar_one_or_none()
+        if obj is None:
+            from app.core.exceptions import NotFoundError
+            raise NotFoundError("سوال یافت نشد")
+        for key, value in payload.model_dump(exclude_unset=True).items():
+            setattr(obj, key, value)
+        await self.repo.db.commit()
+        await self.repo.db.refresh(obj)
+        return obj
+
+    async def delete_question(self, id: uuid.UUID):
+        from .models import QuizQuestion
+        q = select(QuizQuestion).where(QuizQuestion.id == id)
+        obj = (await self.repo.db.execute(q)).scalar_one_or_none()
+        if obj is None:
+            from app.core.exceptions import NotFoundError
+            raise NotFoundError("سوال یافت نشد")
+        await self.repo.db.delete(obj)
+        await self.repo.db.commit()

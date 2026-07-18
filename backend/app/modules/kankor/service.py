@@ -51,3 +51,24 @@ class KankorService:
         if diff < -3:
             return "falling"
         return "stable"
+
+    # --- CRUD ---
+
+    async def list_cutoffs(self, department_id: uuid.UUID | None = None):
+        return await self.repo.list_cutoffs(department_id)
+
+    async def create_cutoff(self, department_id: uuid.UUID, payload):
+        data = payload.model_dump()
+        data["id"] = uuid.uuid4()
+        data["department_id"] = department_id
+        return await self.repo.create_cutoff(data)
+
+    async def delete_cutoff(self, id: uuid.UUID):
+        from .models import KankorCutoff
+        from sqlalchemy import select
+        q = select(KankorCutoff).where(KankorCutoff.id == id)
+        obj = (await self.repo.db.execute(q)).scalar_one_or_none()
+        if obj is None:
+            raise NotFoundError("کات‌آف یافت نشد")
+        await self.repo.db.delete(obj)
+        await self.repo.db.commit()

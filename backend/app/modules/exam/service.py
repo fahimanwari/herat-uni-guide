@@ -253,3 +253,22 @@ class ExamService:
         q = select(func.avg(ExamResult.score)).where(ExamResult.exam_id == exam_id)
         result = (await self.repo.db.execute(q)).scalar()
         return result or 0
+
+    # --- CRUD ---
+
+    async def create_exam(self, payload):
+        data = payload.model_dump()
+        data["id"] = uuid.uuid4()
+        return await self.repo.create(data)
+
+    async def update_exam(self, id: uuid.UUID, payload):
+        exam = await self.repo.get_exam(id)
+        if exam is None:
+            raise NotFoundError("امتحان یافت نشد")
+        return await self.repo.update(exam, payload.model_dump(exclude_unset=True))
+
+    async def delete_exam(self, id: uuid.UUID):
+        exam = await self.repo.get_exam(id)
+        if exam is None:
+            raise NotFoundError("امتحان یافت نشد")
+        await self.repo.delete(exam)

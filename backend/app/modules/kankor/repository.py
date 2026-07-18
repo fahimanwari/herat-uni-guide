@@ -34,3 +34,22 @@ class KankorRepository:
         await self.db.commit()
         await self.db.refresh(obj)
         return obj
+
+    # --- Cutoff CRUD ---
+
+    async def list_cutoffs(self, department_id: uuid.UUID | None = None) -> list[KankorCutoff]:
+        q = select(KankorCutoff).order_by(KankorCutoff.year.desc())
+        if department_id:
+            q = q.where(KankorCutoff.department_id == department_id)
+        return list((await self.db.execute(q)).scalars())
+
+    async def create_cutoff(self, data: dict) -> KankorCutoff:
+        obj = KankorCutoff(**data)
+        self.db.add(obj)
+        await self.db.commit()
+        await self.db.refresh(obj)
+        return obj
+
+    async def delete_cutoff(self, obj: KankorCutoff) -> None:
+        await self.db.delete(obj)
+        await self.db.commit()

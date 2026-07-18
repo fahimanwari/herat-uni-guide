@@ -72,3 +72,37 @@ class QuestionBankService:
         )
         result = await self.repo.db.execute(q)
         return list(result.scalars())
+
+    # --- CRUD ---
+
+    async def create_question(self, payload):
+        data = payload.model_dump()
+        data["id"] = uuid.uuid4()
+        return await self.repo.create(data)
+
+    async def update_question(self, id: uuid.UUID, payload):
+        from .models import QuestionBank
+        q = select(QuestionBank).where(QuestionBank.id == id)
+        obj = (await self.repo.db.execute(q)).scalar_one_or_none()
+        if obj is None:
+            from app.core.exceptions import NotFoundError
+            raise NotFoundError("سوال یافت نشد")
+        return await self.repo.update(obj, payload.model_dump(exclude_unset=True))
+
+    async def delete_question(self, id: uuid.UUID):
+        from .models import QuestionBank
+        q = select(QuestionBank).where(QuestionBank.id == id)
+        obj = (await self.repo.db.execute(q)).scalar_one_or_none()
+        if obj is None:
+            from app.core.exceptions import NotFoundError
+            raise NotFoundError("سوال یافت نشد")
+        await self.repo.delete(obj)
+
+    async def import_questions(self, questions: list):
+        count = 0
+        for q in questions:
+            data = q.model_dump()
+            data["id"] = uuid.uuid4()
+            await self.repo.create(data)
+            count += 1
+        return {"imported": count}

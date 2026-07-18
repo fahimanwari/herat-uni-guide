@@ -37,6 +37,18 @@ class ExamListItem(BaseModel):
     passing_score: float
 
 
+class ExamCreate(BaseModel):
+    title_fa: str
+    title_en: str | None = None
+    category: str = "kankor"
+    year: int | None = None
+    duration_minutes: int = 60
+    total_questions: int = 10
+    passing_score: float = 50.0
+    description_fa: str | None = None
+    max_score: float = 100.0
+
+
 class ExamDetail(ExamListItem):
     description_fa: str | None
     max_score: float
