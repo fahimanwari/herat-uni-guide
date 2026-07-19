@@ -74,7 +74,7 @@ BOOK_INFO = {
     "G12-Dr-Tafseer.pdf": ("تفسیر شریف", "12"),
 }
 
-MIN_CHARS = 200  # صفحات خیلی کوتاه (جلد، سفید) رد شوند
+MIN_CHARS = 100  # صفحات خیلی کوتاه (جلد، سفید) رد شوند
 
 
 def extract_page(pdf: Path, page: int) -> str:
