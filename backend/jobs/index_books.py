@@ -132,7 +132,7 @@ async def index_book(db, filename: str):
 
 
 async def main():
-    targets = [sys.argv[1]] if len(sys.argv) > 1 else list(BOOK_INFO.keys())
+    targets = sys.argv[1:] if len(sys.argv) > 1 else list(BOOK_INFO.keys())
     async with SessionLocal() as db:
         total = 0
         for f in targets:
