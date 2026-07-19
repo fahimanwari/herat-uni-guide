@@ -19,7 +19,8 @@ class RagIndexer:
         self.db = db
 
     async def reindex_all(self) -> int:
-        await self.db.execute(delete(RagChunk))
+        # کتاب‌ها حفظ شوند — فقط chunk‌های غیرکتابی پاک شوند
+        await self.db.execute(delete(RagChunk).where(RagChunk.source_type != "book"))
         count = 0
         count += await self._index_departments()
         count += await self._index_news()

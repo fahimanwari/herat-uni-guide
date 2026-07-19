@@ -15,6 +15,7 @@ class ChatRequest(BaseModel):
     message: str
     language: str = "fa"
     session_id: str = ""
+    mode: str = "general"  # "general" or "book"
 
 
 @router.post("/chat", response_model=ChatReply)
@@ -26,7 +27,7 @@ async def chat(payload: ChatRequest, request: Request, db: AsyncSession = Depend
     redis_client = aioredis.from_url(settings.redis_url)
     try:
         service = ChatService(db, redis_client)
-        return await service.ask(payload.message, payload.language)
+        return await service.ask(payload.message, payload.language, payload.mode)
     finally:
         await redis_client.aclose()
 

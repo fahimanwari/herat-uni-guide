@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import String, Text, ForeignKey
+from sqlalchemy import String, Text, ForeignKey, JSON
 from sqlalchemy.orm import Mapped, mapped_column
 from pgvector.sqlalchemy import Vector
 
@@ -17,6 +17,7 @@ class RagChunk(Base):
     content: Mapped[str] = mapped_column(Text)
     language: Mapped[str] = mapped_column(String(5), default="fa")
     embedding = mapped_column(Vector(384))
+    meta: Mapped[dict] = mapped_column(JSON, default=dict)
 
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 

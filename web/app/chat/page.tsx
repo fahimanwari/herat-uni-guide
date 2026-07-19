@@ -33,6 +33,7 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [sessionId, setSessionId] = useState("");
+  const [booksMode, setBooksMode] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -60,6 +61,7 @@ export default function ChatPage() {
           message: msg,
           language: "fa",
           session_id: sessionId,
+          mode: booksMode ? "book" : "general",
         }),
       });
 
@@ -96,6 +98,17 @@ export default function ChatPage() {
           <p className="text-muted text-center mb-6 text-sm">
             سوالات خود درباره پوهنتون هرات را بپرسید
           </p>
+
+          {/* Books Mode Toggle */}
+          <label className="flex items-center justify-center gap-2 text-sm text-muted cursor-pointer mb-4 p-3 rounded-lg border border-border bg-surface hover:bg-primary-50 transition-colors">
+            <input
+              type="checkbox"
+              checked={booksMode}
+              onChange={(e) => setBooksMode(e.target.checked)}
+              className="w-4 h-4 text-primary-600 rounded"
+            />
+            فقط از کتاب‌های درسی جواب بده (با ذکر کتاب و صفحه)
+          </label>
 
           {/* Chat Area */}
           <Card className="mb-4 min-h-[400px] max-h-[500px] overflow-y-auto flex flex-col">

@@ -12,6 +12,16 @@ SYSTEM_PROMPT = """تو دستیار هوشمند پوهنتون هرات هست
 === اطلاعات دانشگاه ===
 {context}"""
 
+BOOK_SYSTEM_PROMPT = """تو معلم کتاب‌های درسی رسمی وزارت معارف افغانستان هستی.
+فقط و فقط از «متن کتاب‌ها» که پایین آمده جواب بده — از دانش خودت هیچ چیزی اضافه نکن.
+در پایان جواب، منبع را دقیق بنویس: نام کتاب، صنف و صفحه (در سر هر بخش متن آمده).
+اگر جواب در متن کتاب‌ها نبود، فقط بنویس:
+«پاسخ این سؤال در کتاب‌های درسی موجود نیست.»
+به زبان {language} و ساده جواب بده.
+
+=== متن کتاب‌ها ===
+{context}"""
+
 
 class ChatReply(BaseModel):
     response: str
@@ -30,9 +40,9 @@ class ChatService:
         except Exception:
             pass  # RAG not available (sentence_transformers not installed)
 
-    async def ask(self, message: str, language: str = "fa") -> ChatReply:
+    async def ask(self, message: str, language: str = "fa", mode: str = "general") -> ChatReply:
         # 1. Cache check
-        cached = await self.cache.get(message, language)
+        cached = await self.cache.get(message, language, mode)
         if cached:
             return ChatReply(response=cached, cached=True)
 
@@ -40,13 +50,27 @@ class ChatService:
         context = ""
         if self.retriever:
             try:
-                chunks = await self.retriever.retrieve(message)
-                context = "\n---\n".join(chunks) if chunks else ""
+                if mode == "book":
+                    # threshold=0.14: فقط chunk‌های مرتبط ارسال شوند (بالاتر از 0.1405 = پایتخت)
+                    chunks = await self.retriever.retrieve(message, source_types=["book"], threshold=0.14)
+                else:
+                    chunks = await self.retriever.retrieve(message)
+                if chunks:
+                    context = "\n---\n".join(c[0] for c in chunks)
             except Exception:
                 context = ""
 
+        if mode == "book" and not context:
+            # در حالت book اگر اطلاعاتی پیدا نشد، بدون LLM پاسخ برگردان
+            answer = "پاسخ این سؤال در کتاب‌های درسی موجود نیست. لطفاً سؤال دیگری مطرح کنید یا با دانشگاه تماس بگیرید."
+            await self.cache.set(message, language, answer, mode)
+            return ChatReply(response=answer, cached=False)
+
         if context:
-            system = SYSTEM_PROMPT.format(language=language, context=context)
+            if mode == "book":
+                system = BOOK_SYSTEM_PROMPT.format(language=language, context=context)
+            else:
+                system = SYSTEM_PROMPT.format(language=language, context=context)
         else:
             system = f"تو دستیار هوشمند پوهنتون هرات هستی. به زبان {language} و با لحن دوستانه جواب بده."
 
@@ -56,6 +80,6 @@ class ChatService:
         )
 
         # 4. Cache for 7 days
-        await self.cache.set(message, language, answer)
+        await self.cache.set(message, language, answer, mode)
 
         return ChatReply(response=answer, cached=False)

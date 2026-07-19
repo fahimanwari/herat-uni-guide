@@ -7,12 +7,12 @@ class ChatCache:
     def __init__(self, redis_client):
         self.redis = redis_client
 
-    def _key(self, message: str, language: str) -> str:
+    def _key(self, message: str, language: str, mode: str = "general") -> str:
         normalized = " ".join(message.strip().lower().split())
-        return f"ai:{language}:{hashlib.sha256(normalized.encode()).hexdigest()}"
+        return f"ai:{mode}:{language}:{hashlib.sha256(normalized.encode()).hexdigest()}"
 
-    async def get(self, message: str, language: str) -> str | None:
-        return await self.redis.get(self._key(message, language))
+    async def get(self, message: str, language: str, mode: str = "general") -> str | None:
+        return await self.redis.get(self._key(message, language, mode))
 
-    async def set(self, message: str, language: str, answer: str):
-        await self.redis.set(self._key(message, language), answer, ex=self.TTL)
+    async def set(self, message: str, language: str, answer: str, mode: str = "general"):
+        await self.redis.set(self._key(message, language, mode), answer, ex=self.TTL)
