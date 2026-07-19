@@ -12,10 +12,16 @@ interface Message {
   cached?: boolean;
 }
 
-const SUGGESTIONS = [
+const SUGGESTIONS_GENERAL = [
   "کدام رشته مناسب من است؟",
   "شرایط کانکور چیست؟",
   "رشته کمپیوتر ساینس چطور است؟",
+];
+
+const SUGGESTIONS_BOOKS = [
+  "قانون دوم نیوتن چیست؟",
+  "هایبریدیزیشن کاربن چیست؟",
+  "گردش آب در طبیعت",
 ];
 
 function getSessionId(): string {
@@ -100,15 +106,16 @@ export default function ChatPage() {
           </p>
 
           {/* Books Mode Toggle */}
-          <label className="flex items-center justify-center gap-2 text-sm text-muted cursor-pointer mb-4 p-3 rounded-lg border border-border bg-surface hover:bg-primary-50 transition-colors">
+          <div className={`flex items-center justify-center gap-3 text-sm cursor-pointer mb-4 p-3 rounded-lg border transition-all ${booksMode ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-border bg-surface text-muted hover:bg-primary-50'}`}>
             <input
               type="checkbox"
               checked={booksMode}
               onChange={(e) => setBooksMode(e.target.checked)}
               className="w-4 h-4 text-primary-600 rounded"
             />
-            فقط از کتاب‌های درسی جواب بده (با ذکر کتاب و صفحه)
-          </label>
+            <span className="font-medium">📚 فقط از کتاب‌های درسی</span>
+            {booksMode && <span className="text-xs bg-primary-100 text-primary-600 px-2 py-0.5 rounded-full">فعال</span>}
+          </div>
 
           {/* Chat Area */}
           <Card className="mb-4 min-h-[400px] max-h-[500px] overflow-y-auto flex flex-col">
@@ -117,7 +124,7 @@ export default function ChatPage() {
                 <div className="text-center py-8">
                   <p className="text-muted mb-6">از من بپرسید...</p>
                   <div className="flex flex-wrap gap-2 justify-center">
-                    {SUGGESTIONS.map((s) => (
+                    {(booksMode ? SUGGESTIONS_BOOKS : SUGGESTIONS_GENERAL).map((s) => (
                       <button
                         key={s}
                         onClick={() => handleSend(s)}
@@ -143,11 +150,13 @@ export default function ChatPage() {
                     }`}
                   >
                     <p className="whitespace-pre-wrap">{m.content}</p>
-                    {m.cached && (
-                      <span className="text-xs opacity-70 block mt-1">
-                        ⚡ پاسخ از حافظه
-                      </span>
-                    )}
+                    <div className="flex items-center gap-2 mt-1">
+                      {m.cached && (
+                        <span className="text-xs opacity-70">
+                          ⚡ حافظه
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
