@@ -51,8 +51,9 @@ class ChatService:
         if self.retriever:
             try:
                 if mode == "book":
-                    # threshold=0.14: فقط chunk‌های مرتبط ارسال شوند (بالاتر از 0.1405 = پایتخت)
-                    chunks = await self.retriever.retrieve(message, source_types=["book"], threshold=0.14)
+                    # threshold=0.16: فقط chunk‌های مرتبط ارسال شوند
+                    # قانون نیوتن=0.148, فعل ماضی=0.147, هایبریدیزیشن=0.155, پایتخت=0.173, بیت‌کوین=0.197
+                    chunks = await self.retriever.retrieve(message, source_types=["book"], threshold=0.16)
                 else:
                     chunks = await self.retriever.retrieve(message)
                 if chunks:
