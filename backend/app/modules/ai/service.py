@@ -61,7 +61,7 @@ class ChatService:
         except Exception:
             pass  # RAG not available (sentence_transformers not installed)
 
-    async def _chat_with_retry(self, system: str, message: str, max_retries: int = 3) -> str:
+    async def _chat_with_retry(self, system: str, message: str, max_retries: int = 4) -> str:
         """تماس با LLM با retry در صورت rate limit"""
         for attempt in range(max_retries):
             try:
@@ -70,7 +70,7 @@ class ChatService:
                 )
             except Exception as e:
                 if "429" in str(e) and attempt < max_retries - 1:
-                    await asyncio.sleep(2 ** attempt)  # 1s, 2s, 4s
+                    await asyncio.sleep(3 * (2 ** attempt))  # 3s, 6s, 12s
                 else:
                     raise
 
