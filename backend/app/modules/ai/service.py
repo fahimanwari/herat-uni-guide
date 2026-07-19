@@ -1,3 +1,4 @@
+import asyncio
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -22,6 +23,26 @@ BOOK_SYSTEM_PROMPT = """تو معلم کتاب‌های درسی رسمی وزا
 === متن کتاب‌ها ===
 {context}"""
 
+# جایگزین‌های املایی رایج در کتاب‌های درسی
+SPELLING_ALIASES = {
+    "فتوسنتز": ["فوتوسنتز", "نتز"],
+    "کلروفیل": ["کلروفیل", "سبزینه"],
+    "میتوکندری": ["میتوکندری", "میتوکوندری"],
+    "کربوهیدرات": ["کربوهیدرات", "کربو هیدرات"],
+    "پروتئین": ["پروتئین", "پروتين"],
+}
+
+
+def expand_query(query: str) -> str:
+    """افزودن جایگزین‌های املایی به سوال برای بهبود جستجو"""
+    expanded = query
+    for word, aliases in SPELLING_ALIASES.items():
+        if word in query:
+            for alias in aliases:
+                if alias != word and alias not in expanded:
+                    expanded += f" {alias}"
+    return expanded
+
 
 class ChatReply(BaseModel):
     response: str
@@ -40,6 +61,19 @@ class ChatService:
         except Exception:
             pass  # RAG not available (sentence_transformers not installed)
 
+    async def _chat_with_retry(self, system: str, message: str, max_retries: int = 3) -> str:
+        """تماس با LLM با retry در صورت rate limit"""
+        for attempt in range(max_retries):
+            try:
+                return await self.provider.chat(
+                    system, [{"role": "user", "content": message}]
+                )
+            except Exception as e:
+                if "429" in str(e) and attempt < max_retries - 1:
+                    await asyncio.sleep(2 ** attempt)  # 1s, 2s, 4s
+                else:
+                    raise
+
     async def ask(self, message: str, language: str = "fa", mode: str = "general") -> ChatReply:
         # 1. Cache check
         cached = await self.cache.get(message, language, mode)
@@ -50,12 +84,14 @@ class ChatService:
         context = ""
         if self.retriever:
             try:
+                # افزودن جایگزین‌های املایی
+                search_query = expand_query(message) if mode == "book" else message
+
                 if mode == "book":
                     # threshold=0.18: فقط chunk‌های مرتبط ارسال شوند
-                    # فتوسنتز=0.176, پایتخت=0.173, بیت‌کوین=0.197
-                    chunks = await self.retriever.retrieve(message, source_types=["book"], threshold=0.18)
+                    chunks = await self.retriever.retrieve(search_query, source_types=["book"], threshold=0.18)
                 else:
-                    chunks = await self.retriever.retrieve(message)
+                    chunks = await self.retriever.retrieve(search_query)
                 if chunks:
                     context = "\n---\n".join(c[0] for c in chunks)
             except Exception:
@@ -75,10 +111,11 @@ class ChatService:
         else:
             system = f"تو دستیار هوشمند پوهنتون هرات هستی. به زبان {language} و با لحن دوستانه جواب بده."
 
-        # 3. Ask LLM
-        answer = await self.provider.chat(
-            system, [{"role": "user", "content": message}]
-        )
+        # 3. Ask LLM with retry
+        try:
+            answer = await self._chat_with_retry(system, message)
+        except Exception:
+            answer = "پاسخ این سؤال در کتاب‌های درسی موجود نیست. لطفاً بعداً تلاش کنید."
 
         # 4. Cache for 7 days
         await self.cache.set(message, language, answer, mode)
