@@ -76,6 +76,51 @@ BOOK_INFO = {
 
 MIN_CHARS = 100  # صفحات خیلی کوتاه (جلد، سفید) رد شوند
 
+# الگوهای استخراج فصل از متن کتاب‌ها
+CHAPTER_PATTERNS = [
+    r'بخش\s+(اول|دوم|سوم|چهارم|پنجم|ششم|هفتم|هشتم|نهم|دهم)',
+    r'فصل\s+(اول|دوم|سوم|چهارم|پنجم|ششم|هفتم|هشتم|نهم|دهم)',
+    r'درس\s+(اول|دوم|سوم|چهارم|پنجم|ششم|هفتم|هشتم|نهم|دهم|[۰-۹]+|\d+)',
+    r'مبحث\s+(اول|دوم|سوم|چهارم|پنجم)',
+]
+
+def build_chapter_map(pdf: Path) -> dict[int, str]:
+    """ساخت نقشه صفحه → فصل با خواندن متن کامل کتاب"""
+    import re
+    full_text = subprocess.run(
+        ["pdftotext", str(pdf), "-"],
+        capture_output=True, text=True, timeout=60,
+    ).stdout
+    full_text = unicodedata.normalize("NFKC", full_text)
+
+    # پیدا کردن شماره صفحات و عناوین فصل‌ها
+    chapter_map = {}
+    current_chapter = None
+    page_num = 0
+
+    for line in full_text.split("\n"):
+        # حذف کاراکترهای RTL و خالی
+        cleaned = re.sub(r'[\u200b-\u200f\u202a-\u202e\u2066-\u2069\u2068\u2069]', '', line).strip()
+
+        # تشخیص شماره صفحه (اعداد عربی یا لاتین)
+        if cleaned.isdigit():
+            page_num = int(cleaned)
+        # اعداد عربی-هندی (١٢٣)
+        elif re.match(r'^[٠-٩]+$', cleaned):
+            arabic_to_int = str.maketrans('٠١٢٣٤٥٦٧٨٩', '0123456789')
+            page_num = int(cleaned.translate(arabic_to_int))
+
+        # تشخیص عنوان فصل
+        for pattern in CHAPTER_PATTERNS:
+            match = re.search(pattern, cleaned)
+            if match:
+                current_chapter = match.group(0).strip()
+                if page_num > 0:
+                    chapter_map[page_num] = current_chapter
+                break
+
+    return chapter_map
+
 
 def extract_page(pdf: Path, page: int) -> str:
     out = subprocess.run(
@@ -109,18 +154,36 @@ async def index_book(db, filename: str):
         print(f"⏭  {filename} قبلاً ایندکس شده ({already} chunk) — رد شد")
         return 0
 
+    # ساخت نقشه فصل‌ها
+    chapter_map = build_chapter_map(pdf)
+    print(f"   نقشه فصل‌ها: {len(chapter_map)} فصل پیدا شد")
+
     n = 0
+    current_chapter = None
     for page in range(1, page_count(pdf) + 1):
         text = extract_page(pdf, page)
         if len(text) < MIN_CHARS:
             continue
-        content = f"کتاب {book_name} صنف {grade}، صفحه {page}:\n{text}"
+
+        # به‌روزرسانی فصل فعلی
+        if page in chapter_map:
+            current_chapter = chapter_map[page]
+
+        content = f"کتاب {book_name} صنف {grade}، صفحه {page}"
+        if current_chapter:
+            content += f" ({current_chapter})"
+        content += f":\n{text}"
+
+        meta = {"book": book_name, "grade": grade, "page": page, "file": filename}
+        if current_chapter:
+            meta["chapter"] = current_chapter
+
         db.add(RagChunk(
             id=uuid.uuid4(),
             source_type="book",
             content=content,
             embedding=embed_passage(content[:2000]),
-            meta={"book": book_name, "grade": grade, "page": page, "file": filename},
+            meta=meta,
         ))
         n += 1
         if n % 50 == 0:
